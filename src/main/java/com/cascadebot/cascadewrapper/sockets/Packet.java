@@ -21,8 +21,4 @@ public class Packet {
         return data;
     }
 
-    public String toJSON() {
-        return Wrapper.GSON.toJson(this);
-    }
-
 }

@@ -1,5 +1,6 @@
 package com.cascadebot.cascadewrapper;
 
+import com.cascadebot.cascadewrapper.sockets.WrapperEndpoint;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
