@@ -41,6 +41,7 @@ public class WrapperSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        ((SessionInfo) conn.getAttachment()).getRateLimiter().acquire(1);
         Packet packet = Packet.fromJSON(message);
         if (packet == null) { // If the received packet is invalid
             sendError(conn, "Invalid JSON!");
