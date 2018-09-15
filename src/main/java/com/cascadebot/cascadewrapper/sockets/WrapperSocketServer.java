@@ -6,12 +6,16 @@ import com.cascadebot.cascadewrapper.Util;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 public class WrapperSocketServer extends WebSocketServer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(WrapperSocketServer.class);
 
     public WrapperSocketServer() {
         super();
@@ -62,18 +66,22 @@ public class WrapperSocketServer extends WebSocketServer {
             if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("token")) {
                 // Authorise Token
                 authenticatedUsers.add(conn.getAttachment()); // Authorises this connection
+                LOGGER.debug("Authorised user with address: " + conn + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
             }
         }
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
-
+        if (conn != null) {
+            sendError(conn, ex.toString());
+        }
+        LOGGER.error("Error in WebSocket Server", ex);
     }
 
     @Override
     public void onStart() {
-
+        LOGGER.info("Wrapper Socket Server started and listening on port:" + this.getAddress().getPort());
     }
 
     private void sendError(WebSocket conn, String error) {
