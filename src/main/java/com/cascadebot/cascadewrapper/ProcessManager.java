@@ -33,16 +33,13 @@ public class ProcessManager {
             case FORCE_STOP:
                 process.destroy();
                 return true;
-                break;
             case FORCE_RESTART:
                 process.destroy();
                 return start();
-                break;
             case FORCE_UPDATE:
                 process.destroy();
                 // Update
                 return start();
-                break;
             case UPDATE:
                 if (handleOperation(Operation.STOP)) {
                     // Handle Update
@@ -53,6 +50,7 @@ public class ProcessManager {
             case NOOP:
                 return true; // No Operation
         }
+        return true;
     }
 
 

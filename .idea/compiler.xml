@@ -9,5 +9,8 @@
         <module name="CascadeWrapper" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Common" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>
