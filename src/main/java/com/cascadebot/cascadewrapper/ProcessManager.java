@@ -1,11 +1,17 @@
 package com.cascadebot.cascadewrapper;
 
 import java.io.IOException;
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class ProcessManager {
+public class ProcessManager implements Runnable {
 
     private Process process;
     private String[] command;
+
+    private Queue<Operation> operationQueue = new LinkedBlockingQueue<>();
+    private static final AtomicBoolean shutdown = new AtomicBoolean(false);
 
     public ProcessManager(String[] command) {
         this.command = command;
@@ -18,6 +24,19 @@ public class ProcessManager {
             return true;
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    @Override
+    public void run() {
+        while (!shutdown.get()) {
+            if (process != null && process.isAlive()) {
+                try {
+                    process.waitFor();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -53,6 +72,8 @@ public class ProcessManager {
         return true;
     }
 
-
+    public static void shutdown() {
+        shutdown.getAndSet(true);
+    }
 
 }
