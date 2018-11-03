@@ -5,9 +5,6 @@
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/ProcessManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/ProcessManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/UpdateThread.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/Wrapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/Wrapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/sockets/Packet.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/sockets/SessionInfo.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/sockets/WrapperSocketServer.java" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/target/" />
@@ -37,14 +34,14 @@
         <counts>
           <entry key="java" value="5450" />
           <entry key="txt" value="165" />
-          <entry key="xml" value="121" />
+          <entry key="xml" value="122" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
           <entry key="JAVA" value="5450" />
           <entry key="PLAIN_TEXT" value="165" />
-          <entry key="XML" value="121" />
+          <entry key="XML" value="122" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -75,8 +72,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/pom.xml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="244">
-              <caret line="23" column="40" selection-start-line="23" selection-start-column="40" selection-end-line="23" selection-end-column="40" />
+            <state relative-caret-position="122">
+              <caret line="48" column="21" selection-start-line="48" selection-start-column="21" selection-end-line="53" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -114,8 +111,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/Wrapper.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="432">
-              <caret line="26" column="8" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
+            <state relative-caret-position="198">
+              <caret line="14" selection-start-line="14" selection-end-line="14" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -136,9 +133,9 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/JsonObject.java">
+        <entry file="file://$PROJECT_DIR$/../Shared/src/main/java/com/cascadebot/shared/JsonObject.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
+            <state relative-caret-position="270">
               <caret line="18" column="22" selection-start-line="18" selection-start-column="22" selection-end-line="18" selection-end-column="22" />
               <folding>
                 <element signature="e#409#410#0" expanded="true" />
@@ -204,9 +201,10 @@
         <option value="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/sockets/OpCodes.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/sockets/WrapperSocketServer.java" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/pom.xml" />
         <option value="$PROJECT_DIR$/../Shared/src/main/java/com/cascadebot/shared/sockets/sockets/SessionInfo.java" />
         <option value="$PROJECT_DIR$/../Shared/src/main/java/com/cascadebot/shared/sockets/SessionInfo.java" />
+        <option value="$PROJECT_DIR$/pom.xml" />
+        <option value="$PROJECT_DIR$/../Shared/src/main/java/com/cascadebot/shared/JsonObject.java" />
       </list>
     </option>
   </component>
@@ -253,6 +251,11 @@
             <path>
               <item name="CascadeWrapper" type="b2602c69:ProjectViewProjectNode" />
               <item name="CascadeWrapper" type="462c0819:PsiDirectoryNode" />
+              <item name=".idea" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="CascadeWrapper" type="b2602c69:ProjectViewProjectNode" />
+              <item name="CascadeWrapper" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
@@ -290,7 +293,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541235008433" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1541235121183" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../Shared" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
@@ -374,7 +377,7 @@
       <workItem from="1537201435543" duration="834000" />
       <workItem from="1537553915042" duration="190000" />
       <workItem from="1541232331447" duration="2198000" />
-      <workItem from="1541234553754" duration="281000" />
+      <workItem from="1541234553754" duration="533000" />
     </task>
     <task id="LOCAL-00001" summary="Woops">
       <created>1536857615477</created>
@@ -415,7 +418,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="31277000" />
+    <option name="totallyTimeSpent" value="31529000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="2552" y="-8" width="1456" height="876" extended-state="6" />
@@ -441,7 +444,7 @@
       <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5008091" side_tool="true" weight="0.28169015" />
       <window_info anchor="bottom" id="Version Control" order="10" />
       <window_info anchor="bottom" id="Java Enterprise" order="11" />
-      <window_info anchor="bottom" id="Messages" order="12" weight="0.3282967" />
+      <window_info anchor="bottom" id="Messages" order="12" visible="true" weight="0.32692307" />
       <window_info anchor="bottom" id="Floobits" order="13" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -665,27 +668,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/Wrapper.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="432">
-          <caret line="26" column="8" selection-start-line="26" selection-start-column="8" selection-end-line="26" selection-end-column="8" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/JsonObject.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
-          <caret line="18" column="22" selection-start-line="18" selection-start-column="22" selection-end-line="18" selection-end-column="22" />
-          <folding>
-            <element signature="e#409#410#0" expanded="true" />
-            <element signature="e#438#439#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="288">
@@ -743,10 +725,31 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/cascadebot/cascadewrapper/Wrapper.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="198">
+          <caret line="14" selection-start-line="14" selection-end-line="14" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/../Shared/src/main/java/com/cascadebot/shared/JsonObject.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="18" column="22" selection-start-line="18" selection-start-column="22" selection-end-line="18" selection-end-column="22" />
+          <folding>
+            <element signature="e#409#410#0" expanded="true" />
+            <element signature="e#438#439#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="244">
-          <caret line="23" column="40" selection-start-line="23" selection-start-column="40" selection-end-line="23" selection-end-column="40" />
+        <state relative-caret-position="122">
+          <caret line="48" column="21" selection-start-line="48" selection-start-column="21" selection-end-line="53" selection-end-column="21" />
         </state>
       </provider>
     </entry>
