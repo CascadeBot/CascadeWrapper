@@ -6,11 +6,8 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="CascadeWrapper" />
+        <module name="cascadewrapper" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="CascadeWrapper" target="11" />
-    </bytecodeTargetLevel>
   </component>
 </project>

@@ -3,6 +3,7 @@ package com.cascadebot.cascadewrapper.sockets;
 import com.cascadebot.cascadewrapper.JsonObject;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
+import com.cascadebot.shared.OpCodes;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;

@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.github.CascadeBot</groupId>
             <artifactId>Shared</artifactId>
-            <version>1.1</version>
+            <version>1.5</version>
         </dependency>
     </dependencies>
 
