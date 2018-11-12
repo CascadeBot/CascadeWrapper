@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -33,6 +31,7 @@ public class ProcessManager implements Runnable {
     }
 
     public Process start() {
+        logger.info("Attempting to start process with filename: {}", fileName);
         try {
             if (Files.exists(Path.of(fileName))) {
                 List<String> program = Arrays.asList("java", "-jar", fileName);
@@ -63,16 +62,19 @@ public class ProcessManager implements Runnable {
 
                 if (exitCode == ExitCodes.STOP) {
                     ERROR_RESTART_COUNT.set(0);
+                    logger.info("Stopping as requested by process.");
                 } else if (exitCode == ExitCodes.RESTART) {
                     ERROR_RESTART_COUNT.set(0);
+                    logger.info("Restarting after 2s as requested by process.");
                     Thread.sleep(2000); // Backoff
                     start();
-
                 } else if (exitCode == ExitCodes.UPDATE) {
                     ERROR_RESTART_COUNT.set(0);
-                    handleUpdate();
-                    start();
-
+                    logger.info("Process has requested update. Will attempt to update and then restart on success.");
+                    if (handleUpdate()) {
+                        logger.info("Restarting process!");
+                        start();
+                    }
                 } else if (exitCode == ExitCodes.ERROR_STOP_RESTART) {
                     if (ERROR_RESTART_COUNT.getAndIncrement() >= 3) {
                         // Log 3 failed restarts
@@ -103,8 +105,9 @@ public class ProcessManager implements Runnable {
 
     }
 
-    private void handleUpdate() {
+    private boolean handleUpdate() {
 
+        return false;
     }
 
 }
