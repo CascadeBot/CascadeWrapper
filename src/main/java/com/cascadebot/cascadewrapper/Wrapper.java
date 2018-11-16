@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Wrapper {
 
     public static final Gson GSON = new GsonBuilder().create();
-    public static final AtomicBoolean SHUTDOWN = new AtomicBoolean(false);
+    public static final AtomicBoolean shutdown = new AtomicBoolean(false);
     private static final Logger logger = LoggerFactory.getLogger(Wrapper.class);
     private static Wrapper instance;
 
