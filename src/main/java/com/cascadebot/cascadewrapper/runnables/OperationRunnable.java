@@ -4,11 +4,11 @@ import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Wrapper;
 
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class OperationRunnable implements Runnable {
 
-    private BlockingQueue<Operation> operationQueue = new LinkedBlockingDeque<>();
+    private BlockingQueue<Operation> operationQueue = new LinkedBlockingQueue<>();
 
 
     @Override
