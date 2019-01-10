@@ -114,14 +114,14 @@ public class Wrapper {
         for (Downloader downloader : downloaders) {
             doneMap.put(getName(downloader.getUrl()), false);
             new Thread(() -> {
-                while (downloader.getStatus() == Downloader.DOWNLOADING) {
+                while (downloader.getStatus() == Downloader.DownloadStatus.DOWNLOADING) {
                     logger.info("Downloading file: '" + getName(downloader.getUrl()) + "' " + downloader.getProgress() + "%");
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ignored) {
                     }
                 }
-                if (downloader.getStatus() != Downloader.COMPLETE) {
+                if (downloader.getStatus() != Downloader.DownloadStatus.COMPLETE) {
                     logger.error("Couldn't download file: " + getName(downloader.getUrl()) + "\nStatus: " + downloader.getStatus());
                     error.set(true);
                 } else {

@@ -11,26 +11,18 @@ import java.net.URL;
 public class Downloader implements Runnable {
     private static final int MAX_BUFFER_SIZE = 1024;
 
-    public static final String[] STATUSES = {"Downloading", "Paused", "Complete", "Cancelled", "Error"};
-
-    public static final int DOWNLOADING = 0;
-    public static final int PAUSED = 1;
-    public static final int COMPLETE = 2;
-    public static final int CANCELLED = 3;
-    public static final int ERROR = 4;
-
     private URL url;
     private File saveLoc;
     private int size;
     private int downloaded;
-    private int status;
+    private DownloadStatus status;
 
     public Downloader(URL url, File saveLoc) {
         this.url = url;
         this.saveLoc = saveLoc;
         size = -1;
         downloaded = 0;
-        status = DOWNLOADING;
+        status = DownloadStatus.DOWNLOADING;
 
         download();
     }
@@ -47,25 +39,25 @@ public class Downloader implements Runnable {
         return ((float) downloaded / size) * 100;
     }
 
-    public int getStatus() {
+    public DownloadStatus getStatus() {
         return status;
     }
 
     public void pause() {
-        status = PAUSED;
+        status = DownloadStatus.PAUSED;
     }
 
     public void resume() {
-        status = DOWNLOADING;
+        status = DownloadStatus.DOWNLOADING;
         download();
     }
 
     public void cancel() {
-        status = CANCELLED;
+        status = DownloadStatus.CANCELLED;
     }
 
     private void error() {
-        status = ERROR;
+        status = DownloadStatus.ERROR;
     }
 
     private void download() {
@@ -102,7 +94,7 @@ public class Downloader implements Runnable {
             file.seek(downloaded);
 
             stream = connection.getInputStream();
-            while (status == DOWNLOADING) {
+            while (status == DownloadStatus.DOWNLOADING) {
                 byte buffer[];
                 if (size - downloaded > MAX_BUFFER_SIZE) {
                     buffer = new byte[MAX_BUFFER_SIZE];
@@ -118,8 +110,8 @@ public class Downloader implements Runnable {
                 downloaded += read;
             }
 
-            if (status == DOWNLOADING) {
-                status = COMPLETE;
+            if (status == DownloadStatus.DOWNLOADING) {
+                status = DownloadStatus.COMPLETE;
             }
         } catch (Exception e) {
             Wrapper.logger.error("Error while download", e);
@@ -140,4 +132,18 @@ public class Downloader implements Runnable {
             }
         }
     }
+
+    public enum DownloadStatus {
+        DOWNLOADING,
+        PAUSED,
+        COMPLETE,
+        CANCELLED,
+        ERROR;
+
+        @Override
+        public String toString() {
+            return Character.toTitleCase(name().charAt(0)) + name().substring(1);
+        }
+    }
+
 }
