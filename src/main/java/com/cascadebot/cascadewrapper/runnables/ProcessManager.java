@@ -1,13 +1,17 @@
 package com.cascadebot.cascadewrapper.runnables;
 
+import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.RunState;
 import com.cascadebot.cascadewrapper.Wrapper;
+import com.cascadebot.cascadewrapper.utils.Downloader;
 import com.cascadebot.shared.ExitCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -126,7 +130,22 @@ public class ProcessManager implements Runnable {
     }
 
     public boolean handleUpdate() {
-        return false;
+        String url = "https://jenkins.weeryan17.com/job/Cascade/lastSuccessfulBuild/artifact/target/CascadeBot-jar-with-dependencies.jar";
+        try {
+            Downloader downloader = new Downloader(new URL(url), new File(Wrapper.cascadeWorkingDir, "CascadeBot.jar"));
+            while (downloader.getStatus() == Downloader.DOWNLOADING) {
+
+            }
+            if(downloader.getStatus() == Downloader.COMPLETE) {
+                OperationRunnable.queueOperation(Operation.RESTART);
+                return true;
+            } else {
+                return false;
+            }
+        } catch (MalformedURLException e) {
+            LOGGER.error("Invalid download url: " + url, e);
+            return false;
+        }
     }
 
     public synchronized Process getProcess() {

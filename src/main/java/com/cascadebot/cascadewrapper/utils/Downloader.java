@@ -1,5 +1,7 @@
 package com.cascadebot.cascadewrapper.utils;
 
+import com.cascadebot.cascadewrapper.Wrapper;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
@@ -82,11 +84,13 @@ public class Downloader implements Runnable {
             connection.connect();
 
             if (connection.getResponseCode() / 100 != 2) {
+                Wrapper.logger.error("Got bad response code: " + connection.getResponseCode());
                 error();
             }
 
             int contentLength = connection.getContentLength();
             if (contentLength < 1) {
+                Wrapper.logger.error("Got no content from download");
                 error();
             }
 
@@ -99,7 +103,7 @@ public class Downloader implements Runnable {
 
             stream = connection.getInputStream();
             while (status == DOWNLOADING) {
-                byte[] buffer;
+                byte buffer[];
                 if (size - downloaded > MAX_BUFFER_SIZE) {
                     buffer = new byte[MAX_BUFFER_SIZE];
                 } else {
@@ -118,6 +122,7 @@ public class Downloader implements Runnable {
                 status = COMPLETE;
             }
         } catch (Exception e) {
+            Wrapper.logger.error("Error while download", e);
             error();
         } finally {
             if (file != null) {

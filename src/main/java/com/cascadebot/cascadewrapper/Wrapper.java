@@ -16,6 +16,10 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Wrapper {
@@ -30,6 +34,8 @@ public class Wrapper {
 
     private WrapperSocketServer server;
 
+    private List<String> urls;
+
     public static void main(String[] args) {
         (instance = new Wrapper()).init();
     }
@@ -41,12 +47,12 @@ public class Wrapper {
     private void init() {
         new Thread(new OperationRunnable()).start();
 
-        server = new WrapperSocketServer(new InetSocketAddress("localhost",8080));
+        server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
         server.start();
 
         FileConfiguration config = new YamlConfiguration();
         try {
-            config.load("config.ynl");
+            config.load("config.yml");
         } catch (IOException | InvalidConfigurationException e) {
             logger.error("Error loading config", e);
             System.exit(1);
@@ -54,32 +60,91 @@ public class Wrapper {
         }
 
         cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
+
+        urls = config.getStringList("cascade.downloads");
+
         File dir = new File(cascadeWorkingDir);
-        if(!dir.exists()) {
+        if (!dir.exists()) {
             firstInitDone = false;
             firstInit(dir);
-        } else if(!dir.isDirectory()) {
+        } else if (!dir.isDirectory()) {
             firstInitDone = false;
             firstInit(dir);
         }
     }
 
     private void firstInit(File dir) {
-        if(!dir.mkdirs()) {
+        firstInitDone = false; //TODO proper checking
+        logger.info("Running initial setup");
+        if (!dir.mkdirs()) {
             logger.error("Failed to make working directories");
             return;
         }
 
-        String url = "https://jenkins.weeryan17.com/job/Cascade/lastSuccessfulBuild/artifact/target/CascadeBot-jar-with-dependencies.jar";
+        downloadFiles();
 
-        try {
-            Downloader downloader = new Downloader(new URL(url), new File(dir, "CascadeBot.jar"));
-            while (downloader.getStatus() != Downloader.COMPLETE) {
+        while (!firstInitDone) {
 
-            }
-            firstInitDone = true;
-        } catch (MalformedURLException e) {
-            logger.error("Invalid download url: " + url, e);
         }
+
+        logger.info("First init done. please go and edit your bots config.");
+        System.exit(0);
+    }
+
+    public void downloadFiles() {
+        boolean error = false;
+        List<Downloader> downloaders = new ArrayList<>();
+        for (String download : urls) {
+            try {
+                Downloader downloader = new Downloader(new URL(download), new File(cascadeWorkingDir, getName(download)));
+                downloaders.add(downloader);
+            } catch (MalformedURLException e) {
+                logger.error("Invalid url: " + download, e);
+                error = true;
+            }
+        }
+
+        if (error) {
+            System.exit(1);
+            return;
+        }
+
+        Map<String, Boolean> doneMap = new HashMap<>();
+
+        for (Downloader downloader : downloaders) {
+            doneMap.put(getName(downloader.getUrl()), false);
+            new Thread(() -> {
+                while (downloader.getStatus() == Downloader.DOWNLOADING) {
+                    logger.info("Downloading file: '" + getName(downloader.getUrl()) + "' " + downloader.getProgress() + "%");
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ignored) {
+                    }
+                }
+                if (downloader.getStatus() != Downloader.COMPLETE) {
+                    logger.error("Couldn't download file: " + getName(downloader.getUrl()) + "\nStatus: " + downloader.getStatus());
+                    System.exit(1);
+                } else {
+                    logger.info("Done downloading " + getName(downloader.getUrl()));
+                    doneMap.put(getName(downloader.getUrl()), true);
+                }
+            }).start();
+        }
+
+        while (!firstInitDone) {
+            boolean done = true;
+            for(Map.Entry<String, Boolean> entry : doneMap.entrySet()) {
+                if(!entry.getValue()) {
+                    done = false;
+                }
+            }
+            firstInitDone = done;
+        }
+
+    }
+
+    private String getName(String url) {
+        String[] split = url.split("/");
+        return split[split.length - 1];
     }
 }

@@ -11,7 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class OperationRunnable implements Runnable {
 
     private static BlockingQueue<Operation> operationQueue = new LinkedBlockingQueue<>();
-    ProcessManager manager;
+    private ProcessManager manager;
 
     public static void queueOperation(Operation operation) {
         operationQueue.add(operation);
