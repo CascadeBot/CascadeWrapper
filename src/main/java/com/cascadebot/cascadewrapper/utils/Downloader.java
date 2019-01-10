@@ -78,12 +78,14 @@ public class Downloader implements Runnable {
             if (connection.getResponseCode() / 100 != 2) {
                 Wrapper.logger.error("Got bad response code: " + connection.getResponseCode());
                 error();
+                return;
             }
 
             int contentLength = connection.getContentLength();
             if (contentLength < 1) {
                 Wrapper.logger.error("Got no content from download");
                 error();
+                return;
             }
 
             if (size == -1) {
