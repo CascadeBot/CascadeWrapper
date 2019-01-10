@@ -130,22 +130,11 @@ public class ProcessManager implements Runnable {
     }
 
     public boolean handleUpdate() {
-        String url = "https://jenkins.weeryan17.com/job/Cascade/lastSuccessfulBuild/artifact/target/CascadeBot-jar-with-dependencies.jar";
-        try {
-            Downloader downloader = new Downloader(new URL(url), new File(Wrapper.cascadeWorkingDir, "CascadeBot.jar"));
-            while (downloader.getStatus() == Downloader.DOWNLOADING) {
-
-            }
-            if(downloader.getStatus() == Downloader.COMPLETE) {
-                OperationRunnable.queueOperation(Operation.RESTART);
-                return true;
-            } else {
-                return false;
-            }
-        } catch (MalformedURLException e) {
-            LOGGER.error("Invalid download url: " + url, e);
-            return false;
+        boolean success = Wrapper.getInstance().downloadFiles();
+        if(success) {
+            OperationRunnable.queueOperation(Operation.RESTART);
         }
+        return success;
     }
 
     public synchronized Process getProcess() {

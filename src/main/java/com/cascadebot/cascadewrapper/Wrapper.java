@@ -81,18 +81,19 @@ public class Wrapper {
             return;
         }
 
-        downloadFiles();
+        if(downloadFiles()) {
 
-        while (!firstInitDone) {
-
+            logger.info("First init done. please go and edit your bots config.");
+            System.exit(0);
+        } else {
+            logger.error("Error downloading files!");
+            System.exit(1);
         }
-
-        logger.info("First init done. please go and edit your bots config.");
-        System.exit(0);
     }
 
-    public void downloadFiles() {
-        boolean error = false;
+    public boolean downloadFiles() {
+        boolean downloadDone = false;
+        AtomicBoolean error = new AtomicBoolean(false);
         List<Downloader> downloaders = new ArrayList<>();
         for (String download : urls) {
             try {
@@ -100,13 +101,12 @@ public class Wrapper {
                 downloaders.add(downloader);
             } catch (MalformedURLException e) {
                 logger.error("Invalid url: " + download, e);
-                error = true;
+                error.set(true);
             }
         }
 
-        if (error) {
-            System.exit(1);
-            return;
+        if (error.get()) {
+            return false;
         }
 
         Map<String, Boolean> doneMap = new HashMap<>();
@@ -123,7 +123,7 @@ public class Wrapper {
                 }
                 if (downloader.getStatus() != Downloader.COMPLETE) {
                     logger.error("Couldn't download file: " + getName(downloader.getUrl()) + "\nStatus: " + downloader.getStatus());
-                    System.exit(1);
+                    error.set(true);
                 } else {
                     logger.info("Done downloading " + getName(downloader.getUrl()));
                     doneMap.put(getName(downloader.getUrl()), true);
@@ -131,15 +131,18 @@ public class Wrapper {
             }).start();
         }
 
-        while (!firstInitDone) {
+        while (!downloadDone) {
             boolean done = true;
             for(Map.Entry<String, Boolean> entry : doneMap.entrySet()) {
                 if(!entry.getValue()) {
                     done = false;
                 }
             }
+            downloadDone = done;
             firstInitDone = done;
         }
+
+        return !error.get();
 
     }
 
