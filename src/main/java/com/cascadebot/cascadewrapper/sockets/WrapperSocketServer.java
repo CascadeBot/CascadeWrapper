@@ -3,7 +3,9 @@ package com.cascadebot.cascadewrapper.sockets;
 import com.cascadebot.cascadewrapper.JsonObject;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
+import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
+import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -13,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class WrapperSocketServer extends WebSocketServer {
 
@@ -55,7 +59,7 @@ public class WrapperSocketServer extends WebSocketServer {
                         String operation = packet.getData().get("operation").getAsString();
                         Operation o = Util.getSafeEnum(Operation.class, operation);
                         if (o != null) {
-                            // Handle Operation
+                            OperationRunnable.queueOperation(o);
                             break;
                         } else {
                             sendError(conn, "Invalid operation!");
