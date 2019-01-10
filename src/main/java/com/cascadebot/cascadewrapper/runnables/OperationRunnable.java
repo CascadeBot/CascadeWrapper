@@ -11,6 +11,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class OperationRunnable implements Runnable {
 
     private static BlockingQueue<Operation> operationQueue = new LinkedBlockingQueue<>();
+    ProcessManager manager;
 
     public static void queueOperation(Operation operation) {
         operationQueue.add(operation);
@@ -28,22 +29,34 @@ public class OperationRunnable implements Runnable {
                     switch (operation) {
 
                         case NOOP:
+                            //TODO figure out what this is suppose to do (looking at you binary)
                             break;
                         case START:
+                            manager = new ProcessManager("CascadeBot.jar", new String[]{});
                             break;
                         case STOP:
+                            manager.getProcess().destroy();
                             break;
                         case RESTART:
+                            manager.getProcess().destroy();
+                            manager = new ProcessManager("CascadeBot.jar", new String[]{});
                             break;
                         case UPDATE:
+                            manager.handleUpdate();
                             break;
                         case FORCE_STOP:
+                            manager.getProcess().destroyForcibly();
                             break;
                         case FORCE_RESTART:
+                            manager.getProcess().destroyForcibly();
+                            manager = new ProcessManager("CascadeBot.jar", new String[]{});
                             break;
                         case FORCE_UPDATE:
+                            manager.getProcess().destroyForcibly();
+                            manager.handleUpdate();
                             break;
                         case WRAPPER_STOP:
+                            System.exit(0);
                             break;
                     }
                 });

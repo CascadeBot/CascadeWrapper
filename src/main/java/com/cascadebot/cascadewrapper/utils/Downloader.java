@@ -1,4 +1,4 @@
-package com.cascadebot.cascadewrapper;
+package com.cascadebot.cascadewrapper.utils;
 
 import java.io.File;
 import java.io.InputStream;
@@ -99,7 +99,7 @@ public class Downloader implements Runnable {
 
             stream = connection.getInputStream();
             while (status == DOWNLOADING) {
-                byte buffer[];
+                byte[] buffer;
                 if (size - downloaded > MAX_BUFFER_SIZE) {
                     buffer = new byte[MAX_BUFFER_SIZE];
                 } else {

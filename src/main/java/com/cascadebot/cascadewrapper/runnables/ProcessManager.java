@@ -6,11 +6,15 @@ import com.cascadebot.shared.ExitCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,30 +29,34 @@ public class ProcessManager implements Runnable {
     private AtomicReference<RunState> state;
     private long lastStartTime;
 
+    private Thread processThread;
+
+    private boolean restartTimer = false;
+
     public ProcessManager(String filename, String[] args) {
         this.fileName = filename;
         this.args = args;
     }
 
-    public Process start() {
+    public void start() {
         LOGGER.info("Attempting to start process with filename: {}", fileName);
         try {
             if (Files.exists(Path.of(fileName))) {
                 List<String> program = Arrays.asList("java", "-jar", fileName);
                 program.addAll(Arrays.asList(args));
                 ProcessBuilder builder = new ProcessBuilder(program);
+                builder.directory(new File(Wrapper.cascadeWorkingDir));
                 process = builder.start();
+                processThread = new Thread(this);
+                processThread.start();
                 LOGGER.info("Successfully started process with filename: {}", fileName);
                 state.set(RunState.STARTING);
                 lastStartTime = System.currentTimeMillis();
-                return process;
             } else {
                 LOGGER.error("The file {} does not exist, cannot start!", fileName);
-                return null;
             }
         } catch (IOException e) {
             LOGGER.error("There was an exception when starting!", e);
-            return null;
         }
     }
 
@@ -78,20 +86,32 @@ public class ProcessManager implements Runnable {
                 } else if (exitCode == ExitCodes.ERROR_STOP_RESTART) {
                     if (errorRestartCount.getAndIncrement() >= 3) {
                         // Log 3 failed restarts
-
+                        LOGGER.error("Process restarted 3 times within 10 mins. We will stop restarting");
                     } else {
+                        if(!restartTimer) {
+                            restartTimer = true;
+                            Timer timer = new Timer();
+                            timer.schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    errorRestartCount.set(0);
+                                    restartTimer = false;
+                                }
+                            }, TimeUnit.MINUTES.toMillis(10));
+                        }
                         Thread.sleep(5000 * errorRestartCount.get());
                         start();
                     }
 
                 } else if (exitCode == ExitCodes.ERROR_STOP_NO_RESTART) {
+                    process.destroy();
+                    LOGGER.error("Process stopped with error code ERROR_STOP_NO_RESTART. Please check the program logs to find the issue");
                 } else {
                     LOGGER.warn("Process executed with unknown exit code: {}", exitCode);
                     if ((System.currentTimeMillis() - lastStartTime) >= 5000) {
                         LOGGER.info("Restarting process as its execution time was > 5s!");
                         Thread.sleep(5000);
                         start();
-                        continue;
                     } else {
                         LOGGER.info("Stopping process as it exited too quickly!");
                     }
@@ -105,7 +125,7 @@ public class ProcessManager implements Runnable {
 
     }
 
-    private boolean handleUpdate() {
+    public boolean handleUpdate() {
         return false;
     }
 
