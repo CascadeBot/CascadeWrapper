@@ -1,6 +1,7 @@
 package com.cascadebot.cascadewrapper.runnables;
 
 import com.cascadebot.cascadewrapper.Operation;
+import com.cascadebot.cascadewrapper.RunState;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
 
@@ -17,6 +18,7 @@ public class OperationRunnable implements Runnable {
 
     public OperationRunnable() {
         instance = this;
+        manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{}); //TODO mayBe add config options for file names
     }
 
     public static void queueOperation(Operation operation) {
@@ -39,31 +41,39 @@ public class OperationRunnable implements Runnable {
                         case NOOP:
                             //TODO figure out what this is suppose to do (looking at you binary)
                             break;
-                        case START: //TODO better logic
-                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{}); //TODO mayBe add config options for file names
+                        case START:
+                            if(!manager.getState().get().equals(RunState.STOPPED)) {
+                                Wrapper.logger.warn("Start operation tried to be triggered when the process wasn't stopped");
+                                return;
+                            }
                             manager.start();
                             break;
                         case STOP:
-                            manager.getProcess().destroy();
+                            if(!manager.getState().get().equals(RunState.STARTED)) {
+                                Wrapper.logger.warn("Stop operation tried to be trigger when the process wasn't running");
+                                return;
+                            }
+                            manager.stop(false);
                             break;
                         case RESTART:
-                            manager.getProcess().destroy();
-                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{});
+                            manager.stop(false);
+                            while (!manager.getState().get().equals(RunState.STOPPED)) {
+                                //Do nothing
+                            }
                             manager.start();
                             break;
                         case UPDATE:
                             manager.handleUpdate();
                             break;
                         case FORCE_STOP:
-                            manager.getProcess().destroyForcibly();
+                            manager.stop(true);
                             break;
                         case FORCE_RESTART:
-                            manager.getProcess().destroyForcibly();
-                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{});
+                            manager.stop(true);
                             manager.start();
                             break;
                         case FORCE_UPDATE:
-                            manager.getProcess().destroyForcibly();
+                            manager.stop(true);
                             manager.handleUpdate();
                             break;
                         case WRAPPER_STOP:

@@ -159,6 +159,18 @@ public class ProcessManager implements Runnable {
         return state;
     }
 
+    public void stop(boolean force) {
+        state.set(RunState.STOPPING);
+        if(force) {
+            process.destroyForcibly();
+            state.set(RunState.STOPPED);
+        } else {
+            process.destroy();
+        }
+
+        lastStartTime = -1;
+    }
+
     public String getFileName() {
         return fileName;
     }
