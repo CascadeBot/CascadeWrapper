@@ -162,7 +162,7 @@ public class ProcessManager implements Runnable {
         return state;
     }
 
-    public void stop(boolean force) {
+    public void stop(boolean force) { //TODO implement either a shutdown hook in the bot, or add command line commands to the bot for stop
         if(process == null) {
             return;
         }
