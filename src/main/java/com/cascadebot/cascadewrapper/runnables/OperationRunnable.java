@@ -65,11 +65,12 @@ public class OperationRunnable implements Runnable {
                         case RESTART:
                             manager.stop(false);
                             AtomicBoolean timeOut = new AtomicBoolean(false);
+                            AtomicBoolean started = new AtomicBoolean(false);
 
                             new Timer().schedule(new TimerTask() {
                                 @Override
                                 public void run() {
-                                    if (!manager.getState().get().equals(RunState.STOPPED)) {
+                                    if (!started.get()) {
                                         timeOut.set(true);
                                         Wrapper.logger.warn("Waiting for process to stop timed out");
                                         WrapperSocketServer socketServer = Wrapper.getInstance().server;
@@ -83,6 +84,7 @@ public class OperationRunnable implements Runnable {
                             while (!manager.getState().get().equals(RunState.STOPPED) && !timeOut.get()) {
                                 //Do nothing
                             }
+                            started.set(true);
                             manager.start();
                             break;
                         case UPDATE:
