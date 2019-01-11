@@ -34,7 +34,7 @@ public class Wrapper {
 
     public static boolean firstInitDone = true;
 
-    private WrapperSocketServer server;
+    public WrapperSocketServer server;
 
     private List<String> urls;
 

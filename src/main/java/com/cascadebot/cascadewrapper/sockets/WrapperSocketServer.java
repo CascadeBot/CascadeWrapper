@@ -13,7 +13,9 @@ import org.java_websocket.server.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutorService;
@@ -32,16 +34,19 @@ public class WrapperSocketServer extends WebSocketServer {
     }
 
     public static Set<SessionInfo> authenticatedUsers = new CopyOnWriteArraySet<>();
+    private Set<WebSocket> connections = new HashSet<>();
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         conn.setAttachment(new SessionInfo());
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
+        connections.add(conn);
         conn.send(new Packet(OpCodes.CONNECTED, new JsonObject().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString()).build()).toJSON());
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+        connections.remove(conn);
         authenticatedUsers.remove(conn.getAttachment());
     }
 
@@ -95,6 +100,13 @@ public class WrapperSocketServer extends WebSocketServer {
     @Override
     public void onStart() {
         LOGGER.info("Wrapper Socket Server started and listening on port:" + this.getAddress().getPort());
+    }
+
+    public void stopServer() throws IOException, InterruptedException {
+        for(WebSocket conn : connections) {
+            conn.close();
+        }
+        this.stop();
     }
 
     private void sendError(WebSocket conn, String error) {
