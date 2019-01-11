@@ -109,10 +109,14 @@ public class WrapperSocketServer extends WebSocketServer {
         this.stop();
     }
 
-    private void sendError(WebSocket conn, String error) {
+    public void sendError(WebSocket conn, String error) {
         conn.send(new Packet(
                 OpCodes.ERROR, new JsonObject().add("error", error).build()
         ).toJSON());
     }
 
+    @Override
+    public Set<WebSocket> getConnections() {
+        return connections;
+    }
 }

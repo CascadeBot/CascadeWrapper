@@ -3,11 +3,18 @@ package com.cascadebot.cascadewrapper.runnables;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.RunState;
 import com.cascadebot.cascadewrapper.Wrapper;
+import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
+import org.java_websocket.WebSocket;
+import org.java_websocket.server.WebSocketServer;
 
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OperationRunnable implements Runnable {
 
@@ -57,7 +64,23 @@ public class OperationRunnable implements Runnable {
                             break;
                         case RESTART:
                             manager.stop(false);
-                            while (!manager.getState().get().equals(RunState.STOPPED)) {
+                            AtomicBoolean timeOut = new AtomicBoolean(false);
+
+                            new Timer().schedule(new TimerTask() {
+                                @Override
+                                public void run() {
+                                    if (!manager.getState().get().equals(RunState.STOPPED)) {
+                                        timeOut.set(true);
+                                        Wrapper.logger.warn("Waiting for process to stop timed out");
+                                        WrapperSocketServer socketServer = Wrapper.getInstance().server;
+                                        for(WebSocket socket : socketServer.getConnections()) {
+                                            socketServer.sendError(socket, "Restart stop timed out!");
+                                        }
+                                    }
+                                }
+                            }, TimeUnit.SECONDS.toMillis(30));
+
+                            while (!manager.getState().get().equals(RunState.STOPPED) && !timeOut.get()) {
                                 //Do nothing
                             }
                             manager.start();
