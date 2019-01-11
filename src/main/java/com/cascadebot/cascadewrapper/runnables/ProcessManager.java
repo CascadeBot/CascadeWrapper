@@ -43,10 +43,12 @@ public class ProcessManager implements Runnable {
     public ProcessManager(String filename, String[] args) {
         this.fileName = filename;
         this.args = args;
+        state.set(RunState.STOPPED);
     }
 
     public void start() {
         LOGGER.info("Attempting to start process with filename: {}", fileName);
+        state.set(RunState.STARTING);
         try {
             if (Files.exists(new File(Wrapper.cascadeWorkingDir, fileName).toPath())) {
                 List<String> program = Arrays.asList("java", "-jar", fileName);
@@ -56,10 +58,11 @@ public class ProcessManager implements Runnable {
                 process = builder.start();
                 processThread = new Thread(this);
                 processThread.start();
+                state.set(RunState.STARTED);
                 LOGGER.info("Successfully started process with filename: {}", fileName);
-                state.set(RunState.STARTING);
                 lastStartTime = System.currentTimeMillis();
             } else {
+                state.set(RunState.STOPPED);
                 LOGGER.error("The file {} does not exist, cannot start!", fileName);
             }
         } catch (IOException e) {
@@ -160,6 +163,9 @@ public class ProcessManager implements Runnable {
     }
 
     public void stop(boolean force) {
+        if(process == null) {
+            return;
+        }
         state.set(RunState.STOPPING);
         if(force) {
             process.destroyForcibly();
