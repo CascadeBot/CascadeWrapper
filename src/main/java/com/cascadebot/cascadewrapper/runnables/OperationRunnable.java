@@ -32,14 +32,14 @@ public class OperationRunnable implements Runnable {
                             //TODO figure out what this is suppose to do (looking at you binary)
                             break;
                         case START:
-                            manager = new ProcessManager("CascadeBot.jar", new String[]{});
+                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{}); //TODO mayne add config options for file names
                             break;
                         case STOP:
                             manager.getProcess().destroy();
                             break;
                         case RESTART:
                             manager.getProcess().destroy();
-                            manager = new ProcessManager("CascadeBot.jar", new String[]{});
+                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{});
                             break;
                         case UPDATE:
                             manager.handleUpdate();
@@ -49,7 +49,7 @@ public class OperationRunnable implements Runnable {
                             break;
                         case FORCE_RESTART:
                             manager.getProcess().destroyForcibly();
-                            manager = new ProcessManager("CascadeBot.jar", new String[]{});
+                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{});
                             break;
                         case FORCE_UPDATE:
                             manager.getProcess().destroyForcibly();
