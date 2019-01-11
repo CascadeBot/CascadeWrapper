@@ -30,6 +30,7 @@ public class Wrapper {
     public static final Logger logger = LoggerFactory.getLogger(Wrapper.class);
     private static Wrapper instance;
     public static String cascadeWorkingDir;
+    public String token;
 
     public static boolean firstInitDone = true;
 
@@ -63,6 +64,8 @@ public class Wrapper {
         cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
 
         urls = config.getStringList("cascade.downloads");
+
+        token = config.getString("wrapper.token");
 
         File dir = new File(cascadeWorkingDir);
         if (!dir.exists()) {

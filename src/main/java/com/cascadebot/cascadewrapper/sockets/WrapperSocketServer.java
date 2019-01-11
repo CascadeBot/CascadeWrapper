@@ -3,6 +3,7 @@ package com.cascadebot.cascadewrapper.sockets;
 import com.cascadebot.cascadewrapper.JsonObject;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
+import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
 import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
@@ -46,7 +47,6 @@ public class WrapperSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        LOGGER.info(message);
         ((SessionInfo) conn.getAttachment()).getRateLimiter().acquire(1);
         Packet packet = Packet.fromJSON(message);
         if (packet == null) { // If the received packet is invalid
@@ -72,9 +72,14 @@ public class WrapperSocketServer extends WebSocketServer {
             }
         } else {
             if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("token")) {
-                // Authorise Token
-                authenticatedUsers.add(conn.getAttachment()); // Authorises this connection
-                LOGGER.info("Authorised user with address: " + conn + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                if(packet.getData().get("token").getAsString().equals(Wrapper.getInstance().token)) {
+                    authenticatedUsers.add(conn.getAttachment()); // Authorises this connection
+                    LOGGER.info("Authorised user with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                } else {
+                    sendError(conn, "Invalid token");
+                }
+            } else {
+                sendError(conn, "Must specify token to authenticate");
             }
         }
     }
