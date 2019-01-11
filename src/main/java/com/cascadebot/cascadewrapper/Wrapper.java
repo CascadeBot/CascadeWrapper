@@ -1,6 +1,7 @@
 package com.cascadebot.cascadewrapper;
 
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import com.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.cascadewrapper.utils.Downloader;
 import com.google.gson.Gson;
@@ -71,6 +72,8 @@ public class Wrapper {
             firstInitDone = false;
             firstInit(dir);
         }
+
+        Runtime.getRuntime().addShutdownHook(new Thread(new ShutdownRunnable()));
     }
 
     private void firstInit(File dir) {

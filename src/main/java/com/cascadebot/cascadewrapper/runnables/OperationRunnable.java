@@ -11,7 +11,13 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class OperationRunnable implements Runnable {
 
     private static BlockingQueue<Operation> operationQueue = new LinkedBlockingQueue<>();
-    private ProcessManager manager;
+    protected ProcessManager manager;
+
+    protected static OperationRunnable instance;
+
+    public OperationRunnable() {
+        instance = this;
+    }
 
     public static void queueOperation(Operation operation) {
         operationQueue.add(operation);
@@ -22,17 +28,20 @@ public class OperationRunnable implements Runnable {
 
     @Override
     public void run() {
+        Wrapper.logger.info("listing for operations");
         while (!Wrapper.shutdown.get() && !Thread.interrupted()) {
             try {
                 Operation operation = operationQueue.take();
+                Wrapper.logger.info("Operation: " + operation);
                 threadPool.submit(() -> {
                     switch (operation) {
 
                         case NOOP:
                             //TODO figure out what this is suppose to do (looking at you binary)
                             break;
-                        case START:
-                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{}); //TODO mayne add config options for file names
+                        case START: //TODO better logic
+                            manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{}); //TODO mayBe add config options for file names
+                            manager.start();
                             break;
                         case STOP:
                             manager.getProcess().destroy();
@@ -40,6 +49,7 @@ public class OperationRunnable implements Runnable {
                         case RESTART:
                             manager.getProcess().destroy();
                             manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{});
+                            manager.start();
                             break;
                         case UPDATE:
                             manager.handleUpdate();
@@ -50,6 +60,7 @@ public class OperationRunnable implements Runnable {
                         case FORCE_RESTART:
                             manager.getProcess().destroyForcibly();
                             manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{});
+                            manager.start();
                             break;
                         case FORCE_UPDATE:
                             manager.getProcess().destroyForcibly();

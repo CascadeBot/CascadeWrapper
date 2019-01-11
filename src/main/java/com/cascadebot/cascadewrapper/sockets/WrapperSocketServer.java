@@ -46,9 +46,11 @@ public class WrapperSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        LOGGER.info(message);
         ((SessionInfo) conn.getAttachment()).getRateLimiter().acquire(1);
         Packet packet = Packet.fromJSON(message);
         if (packet == null) { // If the received packet is invalid
+            LOGGER.warn("Received invalid json");
             sendError(conn, "Invalid JSON!");
             return;
         }
@@ -72,7 +74,7 @@ public class WrapperSocketServer extends WebSocketServer {
             if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("token")) {
                 // Authorise Token
                 authenticatedUsers.add(conn.getAttachment()); // Authorises this connection
-                LOGGER.debug("Authorised user with address: " + conn + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                LOGGER.info("Authorised user with address: " + conn + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
             }
         }
     }
