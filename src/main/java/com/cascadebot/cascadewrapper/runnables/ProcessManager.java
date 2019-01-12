@@ -136,7 +136,7 @@ public class ProcessManager implements Runnable {
                 } else if (exitCode == ExitCodes.ERROR_STOP_NO_RESTART) {
                     process.destroy();
                     LOGGER.error("Process stopped with error code ERROR_STOP_NO_RESTART. Please check the program logs to find the issue");
-                } else if (exitCode == ExitCodes.STOP_WRAPPER) {
+                } else if (exitCode == ExitCodes.STOP_WRAPPER || exitCode == 1) {
                     LOGGER.info("Process stopped from wrapper");
                 } else {
                     LOGGER.warn("Process executed with unknown exit code: {}", exitCode);
@@ -184,6 +184,8 @@ public class ProcessManager implements Runnable {
         } else {
             PrintWriter writer = new PrintWriter(process.getOutputStream());
             writer.println("stop");
+            writer.flush();
+            writer.close();
         }
 
         lastStartTime = -1;
