@@ -88,7 +88,7 @@
         <dependency>
             <groupId>com.github.CascadeBot</groupId>
             <artifactId>Shared</artifactId>
-            <version>1.8.1</version>
+            <version>1.8.2</version>
         </dependency>
         <!-- You might ask why I have spigot here. Well they have nice yaml configuration so..... deal with it -->
         <dependency>

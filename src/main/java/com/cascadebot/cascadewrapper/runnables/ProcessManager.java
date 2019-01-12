@@ -1,5 +1,6 @@
 package com.cascadebot.cascadewrapper.runnables;
 
+import com.cascadebot.cascadewrapper.CommandHandler;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.RunState;
 import com.cascadebot.cascadewrapper.Wrapper;
@@ -40,10 +41,13 @@ public class ProcessManager implements Runnable {
 
     private boolean restartTimer = false;
 
+    private CommandHandler handler;
+
     public ProcessManager(String filename, String[] args) {
         this.fileName = filename;
         this.args = args;
         state.set(RunState.STOPPED);
+        handler = new CommandHandler(this);
     }
 
     public void start() {
@@ -80,6 +84,11 @@ public class ProcessManager implements Runnable {
                 try {
                     while ((line = reader.readLine()) != null) {
                         LOGGER.info("[Bot] " + line);
+                        if(line.startsWith("CASCADEOP")) {
+                            LOGGER.info("Received command from bot: " + line);
+                            String[] cmd = line.split(" ");
+                            handler.handleCommand(Arrays.copyOfRange(cmd, 1, cmd.length - 1));
+                        }
                     }
                 } catch (IOException e) {
                     LOGGER.error("Error reading process log", e);
@@ -125,7 +134,7 @@ public class ProcessManager implements Runnable {
                 } else if (exitCode == ExitCodes.ERROR_STOP_NO_RESTART) {
                     process.destroy();
                     LOGGER.error("Process stopped with error code ERROR_STOP_NO_RESTART. Please check the program logs to find the issue");
-                } else if (exitCode == 1) {
+                } else if (exitCode == ExitCodes.STOP_WRAPPER) {
                     LOGGER.info("Process stopped from wrapper");
                 } else {
                     LOGGER.warn("Process executed with unknown exit code: {}", exitCode);
@@ -146,7 +155,7 @@ public class ProcessManager implements Runnable {
 
     }
 
-    public boolean handleUpdate() {
+    public boolean handleUpdate() { //TODO version based updates
         boolean success = Wrapper.getInstance().downloadFiles();
         if(success) {
             OperationRunnable.queueOperation(Operation.RESTART);
@@ -187,5 +196,9 @@ public class ProcessManager implements Runnable {
 
     public long getLastStartTime() {
         return lastStartTime;
+    }
+
+    public Logger getLOGGER() {
+        return LOGGER;
     }
 }
