@@ -37,7 +37,6 @@ public class OperationRunnable implements Runnable {
 
     @Override
     public void run() {
-        manager.handleUpdate("1.0.2");
         Wrapper.logger.info("listing for operations");
         while (!Wrapper.shutdown.get() && !Thread.interrupted()) {
             try {

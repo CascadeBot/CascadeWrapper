@@ -177,12 +177,22 @@ public class ProcessManager {
     }
 
     public boolean handleUpdate() {
+        return handleUpdate(true);
+    }
+
+    /**
+     * This will update to the latest build, or the latest version.
+     *
+     * @param version set this to true to update to the latest version
+     * @return weather the update was a success.
+     */
+    public boolean handleUpdate(boolean version) {
         return handleUpdate(-1);
     }
 
     // This is a method I might come back to in the future. For now it's not used and commented out, but in the future we might use it.
     /*public boolean handleUpdate(String version) {
-        try { //TODO move this to startup and have it update the version list every time it goes here.
+        try { //TODO move this to startup, and update it on probably another operation, or ever like 5 mins.
             URL rss = new URL(Wrapper.getInstance().getUrl() + "/rssAll");
             DocumentBuilderFactory factory =
                     DocumentBuilderFactory.newInstance();
