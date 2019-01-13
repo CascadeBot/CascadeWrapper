@@ -38,6 +38,8 @@ public class ProcessManager {
 
     private CommandHandler handler;
 
+    private boolean forceStoped = false;
+
     public ProcessManager(String filename, String[] args) {
         this.fileName = filename;
         this.args = args;
@@ -131,22 +133,33 @@ public class ProcessManager {
                 System.exit(0);
             } else if (exitCode == ExitCodes.STOPPED_BY_WRAPPER) {
                 LOGGER.info("Process stopped by wrapper");
-            } else {
-                LOGGER.warn("Process executed with unknown exit code: {}", exitCode);
-                if ((System.currentTimeMillis() - lastStartTime) >= 5000) {
-                    LOGGER.info("Restarting process as its execution time was > 5s!");
-                    Thread.sleep(5000);
-                    startProcess();
+            } else if (exitCode == 1) {
+                if(forceStoped) {
+                    forceStoped = false;
+                    LOGGER.info("Process force stooped by wrapper");
                 } else {
-                    LOGGER.info("Stopping process as it exited too quickly!");
+                    unknownExitCode();
                 }
+            } else {
+                unknownExitCode();
             }
 
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            LOGGER.error("Process waiting has been interrupted!");
+            LOGGER.error("Process waiting has been interrupted!", e);
         }
 
+    }
+
+    private void unknownExitCode() throws InterruptedException {
+        LOGGER.warn("Process executed with unknown exit code: {}", exitCode);
+        if ((System.currentTimeMillis() - lastStartTime) >= 5000) {
+            LOGGER.info("Restarting process as its execution time was > 5s!");
+            Thread.sleep(5000);
+            startProcess();
+        } else {
+            LOGGER.info("Stopping process as it exited too quickly!");
+        }
     }
 
     public boolean handleUpdate() { //TODO version based updates
@@ -171,6 +184,7 @@ public class ProcessManager {
         }
         state.set(RunState.STOPPING);
         if (force) {
+            forceStoped = true;
             process.destroyForcibly();
             state.set(RunState.STOPPED);
         } else {
