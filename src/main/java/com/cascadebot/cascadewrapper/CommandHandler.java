@@ -1,7 +1,5 @@
 package com.cascadebot.cascadewrapper;
 
-import com.cascadebot.cascadewrapper.runnables.ProcessManager;
-
 public class CommandHandler {
 
     private ProcessManager manager;

@@ -10,6 +10,7 @@ public enum Operation {
     FORCE_STOP, // Force operations should never be able be called from the bot
     FORCE_RESTART,
     FORCE_UPDATE,
-    WRAPPER_STOP;
+    WRAPPER_STOP,
+    STOPPED_BY_WRAPPER;
 
 }
