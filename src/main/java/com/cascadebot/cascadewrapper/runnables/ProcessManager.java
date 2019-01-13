@@ -1,25 +1,14 @@
 package com.cascadebot.cascadewrapper.runnables;
 
-import com.cascadebot.cascadewrapper.CommandHandler;
-import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.RunState;
-import com.cascadebot.cascadewrapper.Wrapper;
-import com.cascadebot.cascadewrapper.utils.Downloader;
+import com.cascadebot.cascadewrapper.*;
 import com.cascadebot.shared.ExitCodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
@@ -40,6 +29,7 @@ public class ProcessManager implements Runnable {
     private long lastStartTime;
 
     private Thread processThread;
+    private Thread consoleReaderThread;
 
     private boolean restartTimer = false;
 
@@ -50,6 +40,10 @@ public class ProcessManager implements Runnable {
         this.args = args;
         state.set(RunState.STOPPED);
         handler = new CommandHandler(this);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            processThread.interrupt();
+            consoleReaderThread.interrupt();
+        }));
     }
 
     public void start() {
@@ -78,24 +72,13 @@ public class ProcessManager implements Runnable {
 
     @Override
     public void run() {
-        InputStream stream = process.getInputStream();
         try {
             while (!Wrapper.shutdown.get() && process != null && process.isAlive()) {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-                String line;
-                try {
-                    while ((line = reader.readLine()) != null) {
-                        LOGGER.info("[Bot] " + line);
-                        if(line.startsWith("CASCADEOP")) {
-                            LOGGER.info("Received command from bot: " + line);
-                            String[] cmd = line.split(" ");
-                            handler.handleCommand(Arrays.copyOfRange(cmd, 1, cmd.length - 1));
-                        }
-                    }
-                } catch (IOException e) {
-                    LOGGER.error("Error reading process log", e);
-                }
+                (consoleReaderThread = new Thread(new ConsoleReader(process.getInputStream(), handler))).start();
+
                 int exitCode = process.waitFor();
+                consoleReaderThread.interrupt(); // Once the process has ended we need to stop this
+
                 state.set(RunState.STOPPED);
 
                 if (exitCode == ExitCodes.STOP) {
