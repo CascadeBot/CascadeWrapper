@@ -36,7 +36,7 @@ public class Wrapper {
 
     public WrapperSocketServer server;
 
-    private List<String> urls;
+    private String url;
 
     public static void main(String[] args) {
         (instance = new Wrapper()).init();
@@ -47,10 +47,6 @@ public class Wrapper {
     }
 
     private void init() {
-        new Thread(new OperationRunnable()).start();
-
-        server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
-        server.start();
 
         FileConfiguration config = new YamlConfiguration();
         try {
@@ -61,9 +57,14 @@ public class Wrapper {
             return;
         }
 
-        cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
+        url = config.getString("cascade.jenkins");
 
-        urls = config.getStringList("cascade.downloads");
+        new Thread(new OperationRunnable()).start();
+
+        server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
+        server.start();
+
+        cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
 
         token = config.getString("wrapper.token");
 
@@ -87,7 +88,7 @@ public class Wrapper {
             return;
         }
 
-        if(downloadFiles()) {
+        if(downloadFiles(-1)) {
 
             logger.info("First init done. please go and edit your bots config.");
             System.exit(0);
@@ -97,7 +98,17 @@ public class Wrapper {
         }
     }
 
-    public boolean downloadFiles() {
+    public boolean downloadFiles(int build) {
+        List<String> urls = new ArrayList<>();
+        if(build == -1) {
+            urls.add(url + "/lastSuccessfulBuild/artifact/target/CascadeBot-jar-with-dependencies.jar");
+            urls.add(url + "/lastSuccessfulBuild/artifact/config.example.yml");
+        } else {
+            urls.add(url + "/" + build + "/artifact/target/CascadeBot-jar-with-dependencies.jar");
+            urls.add(url + "/" + build + "/artifact/config.example.yml");
+
+        }
+
         boolean downloadDone = false;
         AtomicBoolean error = new AtomicBoolean(false);
         List<Downloader> downloaders = new ArrayList<>();
@@ -155,5 +166,9 @@ public class Wrapper {
     private String getName(String url) {
         String[] split = url.split("/");
         return split[split.length - 1];
+    }
+
+    public String getUrl() {
+        return url;
     }
 }

@@ -5,10 +5,20 @@ import com.cascadebot.shared.ExitCodes;
 import com.cascadebot.shared.SharedConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +27,8 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProcessManager {
 
@@ -46,7 +58,9 @@ public class ProcessManager {
         state.set(RunState.STOPPED);
         handler = new CommandHandler(this);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            consoleReaderThread.interrupt();
+            if(consoleReaderThread != null) {
+                consoleReaderThread.interrupt();
+            }
         }));
     }
 
@@ -162,8 +176,43 @@ public class ProcessManager {
         }
     }
 
-    public boolean handleUpdate() { //TODO version based updates
-        boolean success = Wrapper.getInstance().downloadFiles();
+    public boolean handleUpdate() {
+        return handleUpdate(-1);
+    }
+
+    // This is a method I might come back to in the future. For now it's not used and commented out, but in the future we might use it.
+    /*public boolean handleUpdate(String version) {
+        try { //TODO move this to startup and have it update the version list every time it goes here.
+            URL rss = new URL(Wrapper.getInstance().getUrl() + "/rssAll");
+            DocumentBuilderFactory factory =
+                    DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            Document doc = builder.parse(rss.openStream());
+            NodeList entries = doc.getDocumentElement().getElementsByTagName("entry");
+            for (int i = 0; i < entries.getLength(); i++) {
+                Node node = entries.item(i);
+                if(node.getNodeType() == Node.ELEMENT_NODE) {
+                    Element elm = (Element) node;
+                    Node titleElm = elm.getElementsByTagName("title").item(0);
+                    Node idElm = elm.getElementsByTagName("id").item(0);
+
+                    String title = titleElm.getTextContent();
+                    System.out.println(idElm.getTextContent());
+                    Matcher matcher = Pattern.compile("[A-z]{3}:[A-z]{6}\\.[A-z]{3}\\.[A-z]{4}\\.[A-z]{3},[0-9]{4}:[A-z ]+:([0-9]+)", Pattern.MULTILINE).matcher(idElm.getTextContent());
+                    matcher.find();
+                    int id = Integer.valueOf(matcher.group(1));
+                    System.out.println(title + ": " + id);
+                }
+            }
+        } catch (ParserConfigurationException | IOException | SAXException e) {
+            Wrapper.logger.error("Error reading rss feed", e);
+            return false;
+        }
+        return false;
+    }*/
+
+    public boolean handleUpdate(int build) {
+        boolean success = Wrapper.getInstance().downloadFiles(build);
         if (success) {
             OperationRunnable.queueOperation(Operation.RESTART);
         }
