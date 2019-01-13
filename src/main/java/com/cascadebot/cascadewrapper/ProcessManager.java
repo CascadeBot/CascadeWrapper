@@ -138,10 +138,10 @@ public class ProcessManager {
                     forceStoped = false;
                     LOGGER.info("Process force stooped by wrapper");
                 } else {
-                    unknownExitCode();
+                    unknownExitCode(1);
                 }
             } else {
-                unknownExitCode();
+                unknownExitCode(exitCode);
             }
 
             Thread.sleep(1000);
@@ -151,7 +151,7 @@ public class ProcessManager {
 
     }
 
-    private void unknownExitCode() throws InterruptedException {
+    private void unknownExitCode(int exitCode) throws InterruptedException {
         LOGGER.warn("Process executed with unknown exit code: {}", exitCode);
         if ((System.currentTimeMillis() - lastStartTime) >= 5000) {
             LOGGER.info("Restarting process as its execution time was > 5s!");
