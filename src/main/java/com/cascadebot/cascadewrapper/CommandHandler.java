@@ -21,7 +21,8 @@ public class CommandHandler {
                 manager.getState().set(RunState.STOPPING);
                 break;
             case UPDATE:
-                //TODO update stuff
+                int build = Integer.valueOf(args[1]);
+                manager.handleUpdate(build);
                 break;
             default:
                 manager.getLOGGER().info("Received invalid operation from bot: " + o.name());
