@@ -2,20 +2,18 @@ package com.cascadebot.cascadewrapper;
 
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.ExitCodes;
-import com.cascadebot.shared.SharedConstants;
+import com.cascadebot.shared.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,8 +25,6 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class ProcessManager {
 
@@ -50,9 +46,17 @@ public class ProcessManager {
 
     private CommandHandler handler;
 
-    private boolean forceStoped = false;
+    private boolean forceStooped = false;
+
+    private Version currentVersion;
 
     public ProcessManager(String filename, String[] args) {
+        File versionFile = new File(Wrapper.cascadeWorkingDir, "version.txt");
+        try {
+            currentVersion = getVersionFromStream(new FileInputStream(versionFile));
+        } catch (FileNotFoundException e) {
+            getLOGGER().error("Error reading version file", e);
+        }
         this.fileName = filename;
         this.args = args;
         state.set(RunState.STOPPED);
@@ -148,8 +152,8 @@ public class ProcessManager {
             } else if (exitCode == ExitCodes.STOPPED_BY_WRAPPER) {
                 LOGGER.info("Process stopped by wrapper");
             } else if (exitCode == 1) {
-                if(forceStoped) {
-                    forceStoped = false;
+                if(forceStooped) {
+                    forceStooped = false;
                     LOGGER.info("Process force stooped by wrapper");
                 } else {
                     unknownExitCode(1);
@@ -187,7 +191,22 @@ public class ProcessManager {
      * @return weather the update was a success.
      */
     public boolean handleUpdate(boolean version) {
-        return handleUpdate(-1);
+        if(version) {
+            try {
+                URL versionUrl = new URL(Wrapper.getInstance().getUrl() + "/lastSuccessfulBuild/artifact/target/classes/version.txt");
+                Version ver = getVersionFromStream(versionUrl.openStream());
+                if(ver.compareTo(currentVersion) > 0) {
+                    return handleUpdate(-1);
+                } else {
+                    return false;
+                }
+            } catch (IOException e) {
+                getLOGGER().error("Error reading version file from jenkins", e);
+                return false;
+            }
+        } else {
+            return handleUpdate(-1);
+        }
     }
 
     // This is a method I might come back to in the future. For now it's not used and commented out, but in the future we might use it.
@@ -224,6 +243,12 @@ public class ProcessManager {
     public boolean handleUpdate(int build) {
         boolean success = Wrapper.getInstance().downloadFiles(build);
         if (success) {
+            File versionFile = new File(Wrapper.cascadeWorkingDir, "version.txt");
+            try {
+                currentVersion = getVersionFromStream(new FileInputStream(versionFile));
+            } catch (FileNotFoundException e) {
+                getLOGGER().error("Can't find version file", e);
+            }
             OperationRunnable.queueOperation(Operation.RESTART);
         }
         return success;
@@ -243,7 +268,7 @@ public class ProcessManager {
         }
         state.set(RunState.STOPPING);
         if (force) {
-            forceStoped = true;
+            forceStooped = true;
             process.destroyForcibly();
             state.set(RunState.STOPPED);
         } else {
@@ -270,5 +295,20 @@ public class ProcessManager {
 
     public Logger getLOGGER() {
         return LOGGER;
+    }
+
+    public Version getVersionFromStream(InputStream stream) {
+        StringBuilder builder = new StringBuilder();
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+            String line = reader.readLine();
+            builder.append(line);
+        } catch (IOException e) {
+            getLOGGER().error("Error reading version file", e);
+        }
+        String versionString = builder.toString();
+        versionString = versionString.replaceAll("\n", "_");
+        getLOGGER().debug(versionString);
+        return Version.parseVer(versionString);
     }
 }

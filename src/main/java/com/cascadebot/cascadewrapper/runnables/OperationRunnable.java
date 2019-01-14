@@ -88,6 +88,7 @@ public class OperationRunnable implements Runnable {
                             manager.start();
                             break;
                         case UPDATE:
+                            Wrapper.logger.info("Update called from wrapper.");
                             manager.handleUpdate();
                             break;
                         case FORCE_STOP:

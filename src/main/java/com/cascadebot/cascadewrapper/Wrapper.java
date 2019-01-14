@@ -17,6 +17,9 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -58,13 +61,12 @@ public class Wrapper {
         }
 
         url = config.getString("cascade.jenkins");
+        cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
 
         new Thread(new OperationRunnable()).start();
 
         server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
         server.start();
-
-        cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
 
         token = config.getString("wrapper.token");
 
@@ -100,12 +102,25 @@ public class Wrapper {
 
     public boolean downloadFiles(int build) {
         List<String> urls = new ArrayList<>();
+        URL versionUrl;
         if(build == -1) {
             urls.add(url + "/lastSuccessfulBuild/artifact/target/CascadeBot-jar-with-dependencies.jar");
             urls.add(url + "/lastSuccessfulBuild/artifact/config.example.yml");
+            try {
+                versionUrl = new URL(url + "/lastSuccessfulBuild/artifact/target/classes/version.txt");
+            } catch (MalformedURLException e) {
+                logger.error("Invalid jenkins url", e);
+                return false;
+            }
         } else {
             urls.add(url + "/" + build + "/artifact/target/CascadeBot-jar-with-dependencies.jar");
             urls.add(url + "/" + build + "/artifact/config.example.yml");
+            try {
+                versionUrl = new URL(url + "/" + build + "/artifact/target/classes/version.txt");
+            } catch (MalformedURLException e) {
+                logger.error("Invalid jenkins url", e);
+                return false;
+            }
 
         }
 
@@ -157,6 +172,14 @@ public class Wrapper {
             }
             downloadDone = done;
             firstInitDone = done;
+        }
+
+        try {
+            logger.info("Downloading version file");
+            Files.copy(versionUrl.openStream(), new File(cascadeWorkingDir, "version.txt").toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Error downloading version file.", e);
+            return false;
         }
 
         return !error.get();
