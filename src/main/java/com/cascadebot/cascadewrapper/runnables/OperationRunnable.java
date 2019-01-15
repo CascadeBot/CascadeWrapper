@@ -89,7 +89,7 @@ public class OperationRunnable implements Runnable {
                             break;
                         case UPDATE:
                             Wrapper.logger.info("Update called from wrapper.");
-                            manager.handleUpdate();
+                            manager.handleUpdate(operation.getBuildNumber());
                             break;
                         case FORCE_STOP:
                             manager.stop(true);
@@ -100,7 +100,7 @@ public class OperationRunnable implements Runnable {
                             break;
                         case FORCE_UPDATE:
                             manager.stop(true);
-                            manager.handleUpdate();
+                            manager.handleUpdate(operation.getBuildNumber());
                             break;
                         case WRAPPER_STOP:
                             System.exit(0);

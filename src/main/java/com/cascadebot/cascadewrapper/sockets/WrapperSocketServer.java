@@ -66,6 +66,10 @@ public class WrapperSocketServer extends WebSocketServer {
                         String operation = packet.getData().get("operation").getAsString();
                         Operation o = Util.getSafeEnum(Operation.class, operation);
                         if (o != null) {
+                            // If no build number is specified in the packet, the bot updates to the latest successful build
+                            if ((o == Operation.UPDATE || o == Operation.FORCE_UPDATE) && packet.getData().has("build")) {
+                                o.setBuildNumber(packet.getData().get("build").getAsInt());
+                            }
                             OperationRunnable.queueOperation(o);
                             break;
                         } else {
@@ -77,7 +81,7 @@ public class WrapperSocketServer extends WebSocketServer {
             }
         } else {
             if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("token")) {
-                if(packet.getData().get("token").getAsString().equals(Wrapper.getInstance().token)) {
+                if (packet.getData().get("token").getAsString().equals(Wrapper.getInstance().token)) {
                     authenticatedUsers.add(conn.getAttachment()); // Authorises this connection
                     LOGGER.info("Authorised user with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
                 } else {
@@ -103,7 +107,7 @@ public class WrapperSocketServer extends WebSocketServer {
     }
 
     public void stopServer() throws IOException, InterruptedException {
-        for(WebSocket conn : connections) {
+        for (WebSocket conn : connections) {
             conn.close();
         }
         this.stop();

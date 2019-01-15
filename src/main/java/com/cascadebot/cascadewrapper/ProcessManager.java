@@ -119,7 +119,7 @@ public class ProcessManager {
             } else if (exitCode == ExitCodes.UPDATE) {
                 errorRestartCount.set(0);
                 LOGGER.info("Process has requested update. Will attempt to update and then restart on success.");
-                if (handleUpdate()) {
+                if (handleUpdate(-1)) {
                     LOGGER.info("Restarting process!");
                     startProcess();
                 }
@@ -177,35 +177,6 @@ public class ProcessManager {
             startProcess();
         } else {
             LOGGER.info("Stopping process as it exited too quickly!");
-        }
-    }
-
-    public boolean handleUpdate() {
-        return handleUpdate(true);
-    }
-
-    /**
-     * This will update to the latest build, or the latest version.
-     *
-     * @param version set this to true to update to the latest version
-     * @return weather the update was a success.
-     */
-    public boolean handleUpdate(boolean version) {
-        if(version) {
-            try {
-                URL versionUrl = new URL(Wrapper.getInstance().getUrl() + "/lastSuccessfulBuild/artifact/target/classes/version.txt");
-                Version ver = getVersionFromStream(versionUrl.openStream());
-                if(ver.compareTo(currentVersion) > 0) {
-                    return handleUpdate(-1);
-                } else {
-                    return false;
-                }
-            } catch (IOException e) {
-                getLOGGER().error("Error reading version file from jenkins", e);
-                return false;
-            }
-        } else {
-            return handleUpdate(-1);
         }
     }
 
@@ -276,7 +247,6 @@ public class ProcessManager {
             getLOGGER().error("Error reading version file", e);
         }
         String versionString = builder.toString();
-        versionString = versionString.replaceAll("\n", "_");
         getLOGGER().debug(versionString);
         return Version.parseVer(versionString);
     }
