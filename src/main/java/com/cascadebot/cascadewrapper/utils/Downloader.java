@@ -71,6 +71,7 @@ public class Downloader implements Runnable {
 
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 Cascade Discord Bot");
             connection.setRequestProperty("Range", "bytes=" + downloaded + "-");
 
             connection.connect();
