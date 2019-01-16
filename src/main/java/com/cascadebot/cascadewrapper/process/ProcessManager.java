@@ -67,6 +67,7 @@ public class ProcessManager {
                 consoleReaderThread.interrupt();
             }
         }));
+        new ProcessStats(this);
     }
 
     public void start() {
