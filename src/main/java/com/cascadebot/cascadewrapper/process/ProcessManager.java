@@ -1,5 +1,9 @@
-package com.cascadebot.cascadewrapper;
+package com.cascadebot.cascadewrapper.process;
 
+import com.cascadebot.cascadewrapper.ConsoleReader;
+import com.cascadebot.cascadewrapper.Operation;
+import com.cascadebot.cascadewrapper.Util;
+import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.ExitCodes;
 import com.cascadebot.shared.Version;
@@ -10,13 +14,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;

@@ -1,4 +1,7 @@
-package com.cascadebot.cascadewrapper;
+package com.cascadebot.cascadewrapper.process;
+
+import com.cascadebot.cascadewrapper.Operation;
+import com.cascadebot.cascadewrapper.Util;
 
 public class CommandHandler {
 

@@ -1,5 +1,6 @@
 package com.cascadebot.cascadewrapper;
 
+import com.cascadebot.cascadewrapper.process.CommandHandler;
 import com.cascadebot.shared.Regex;
 import com.cascadebot.shared.SharedConstants;
 

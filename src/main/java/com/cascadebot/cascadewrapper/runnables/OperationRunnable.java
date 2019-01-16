@@ -1,8 +1,8 @@
 package com.cascadebot.cascadewrapper.runnables;
 
 import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.ProcessManager;
-import com.cascadebot.cascadewrapper.RunState;
+import com.cascadebot.cascadewrapper.process.ProcessManager;
+import com.cascadebot.cascadewrapper.process.RunState;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
