@@ -103,7 +103,7 @@ public class WrapperSocketServer extends WebSocketServer {
                 Process process = OperationRunnable.getInstance().getManager().getProcess();
                 if (process == null || !process.isAlive()) {
                     Request request = new Request.Builder()
-                            .url("https://discordapp.com/api/guilds/488394590458478602/members/215644829969809421")
+                            .url("https://discordapp.com/api/guilds/488394590458478602/members/" + id)
                             .get()
                             .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
                             .build();
@@ -128,7 +128,7 @@ public class WrapperSocketServer extends WebSocketServer {
                     return;
                 }
 
-                waitingAuth.add(id);
+                waitingAuth.put(id, conn.getAttachment());
 
                 PrintWriter writer = new PrintWriter(process.getOutputStream());
                 writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac);
