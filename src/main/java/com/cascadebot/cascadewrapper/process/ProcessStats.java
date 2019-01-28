@@ -31,6 +31,7 @@ public class ProcessStats extends TimerTask {
         if (!manager.getProcess().info().totalCpuDuration().isPresent()) {
             return;
         }
+
         long run = System.currentTimeMillis() - manager.getLastStartTime();
         long cpu = TimeUnit.NANOSECONDS.toMillis(manager.getProcess().info().totalCpuDuration().get().getNano());
 

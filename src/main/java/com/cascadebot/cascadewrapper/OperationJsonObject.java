@@ -2,15 +2,15 @@ package com.cascadebot.cascadewrapper;
 
 import com.google.gson.JsonPrimitive;
 
-public class JsonObject {
+public class OperationJsonObject {
 
     com.google.gson.JsonObject object;
 
-    public JsonObject() {
+    public OperationJsonObject() {
         object = new com.google.gson.JsonObject();
     }
 
-    public JsonObject add(String key, String value) {
+    public OperationJsonObject add(String key, String value) {
         object.add(key, new JsonPrimitive(value));
         return this;
     }

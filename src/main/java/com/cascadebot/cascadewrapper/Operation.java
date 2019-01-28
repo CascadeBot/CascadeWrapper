@@ -2,7 +2,6 @@ package com.cascadebot.cascadewrapper;
 
 public enum Operation {
 
-    NOOP,
     START,
     STOP,
     RESTART,

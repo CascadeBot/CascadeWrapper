@@ -44,10 +44,6 @@ public class OperationRunnable implements Runnable {
                 Wrapper.logger.info("Operation: " + operation);
                 threadPool.submit(() -> {
                     switch (operation) {
-
-                        case NOOP:
-                            //TODO figure out what this is suppose to do (looking at you binary)
-                            break;
                         case START:
                             if(!manager.getState().get().equals(RunState.STOPPED)) {
                                 Wrapper.logger.warn("Start operation tried to be triggered when the process wasn't stopped");
@@ -110,5 +106,13 @@ public class OperationRunnable implements Runnable {
 
             } catch (InterruptedException ignored) {}
         }
+    }
+
+    public static OperationRunnable getInstance() {
+        return instance;
+    }
+
+    public ProcessManager getManager() {
+        return manager;
     }
 }

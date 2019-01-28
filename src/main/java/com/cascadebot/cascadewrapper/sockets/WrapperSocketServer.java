@@ -1,12 +1,18 @@
 package com.cascadebot.cascadewrapper.sockets;
 
-import com.cascadebot.cascadewrapper.JsonObject;
+import com.cascadebot.cascadewrapper.OperationJsonObject;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
-import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
+import com.cascadebot.shared.SharedConstants;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
+import okhttp3.Request;
+import okhttp3.Response;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -14,16 +20,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class WrapperSocketServer extends WebSocketServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WrapperSocketServer.class);
+
+    private static WrapperSocketServer instance;
 
     public WrapperSocketServer() {
         super();
@@ -34,6 +45,7 @@ public class WrapperSocketServer extends WebSocketServer {
     }
 
     public static Set<SessionInfo> authenticatedUsers = new CopyOnWriteArraySet<>();
+    public static Map<String, SessionInfo> waitingAuth = new HashMap<>();
     private Set<WebSocket> connections = new HashSet<>();
 
     @Override
@@ -41,7 +53,7 @@ public class WrapperSocketServer extends WebSocketServer {
         conn.setAttachment(new SessionInfo());
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
         connections.add(conn);
-        conn.send(new Packet(OpCodes.CONNECTED, new JsonObject().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString()).build()).toJSON());
+        conn.send(new Packet(OpCodes.CONNECTED, new OperationJsonObject().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString()).build()).toJSON());
     }
 
     @Override
@@ -80,17 +92,55 @@ public class WrapperSocketServer extends WebSocketServer {
                 default:
             }
         } else {
-            if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("token")) {
-                if (packet.getData().get("token").getAsString().equals(Wrapper.getInstance().token)) {
-                    authenticatedUsers.add(conn.getAttachment()); // Authorises this connection
-                    LOGGER.info("Authorised user with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                } else {
-                    sendError(conn, "Invalid token");
+            if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("user")) { //TODO send error
+                JsonObject user = packet.getData().get("user").getAsJsonObject();
+                String id = user.get("id").getAsString();
+                String hmac = user.get("hmac").getAsString();
+                if(Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
+
+                    return;
                 }
+                Process process = OperationRunnable.getInstance().getManager().getProcess();
+                if (process == null || !process.isAlive()) {
+                    Request request = new Request.Builder()
+                            .url("https://discordapp.com/api/guilds/488394590458478602/members/215644829969809421")
+                            .get()
+                            .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
+                            .build();
+
+                    try {
+                        Response response = Wrapper.getInstance().httpClient.newCall(request).execute();
+                        if(response.body() == null) return;
+                        String res = response.body().string();
+                        JsonObject jsonObject = new JsonParser().parse(res).getAsJsonObject();
+                        if(jsonObject.has("code")) return;
+                        JsonArray roles = jsonObject.getAsJsonArray("roles");
+                        if(roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
+                            authenticatedUsers.add(conn.getAttachment());
+                            LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                        }
+
+                    } catch (IOException e) {
+                        Wrapper.logger.error("Error checking user from discord", e);
+                        return;
+                    }
+
+                    return;
+                }
+
+                waitingAuth.add(id);
+
+                PrintWriter writer = new PrintWriter(process.getOutputStream());
+                writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac);
+                writer.flush(); //Bot will now authenticate us
             } else {
                 sendError(conn, "Must specify token to authenticate");
             }
         }
+    }
+
+    private String getUserFromJson(JsonObject object) {
+        return object.get("username").getAsString() + "#" + object.get("discriminator").getAsString();
     }
 
     @Override
@@ -115,12 +165,16 @@ public class WrapperSocketServer extends WebSocketServer {
 
     public void sendError(WebSocket conn, String error) {
         conn.send(new Packet(
-                OpCodes.ERROR, new JsonObject().add("error", error).build()
+                OpCodes.ERROR, new OperationJsonObject().add("error", error).build()
         ).toJSON());
     }
 
     @Override
     public Set<WebSocket> getConnections() {
         return connections;
+    }
+
+    public static WrapperSocketServer getInstance() {
+        return instance;
     }
 }

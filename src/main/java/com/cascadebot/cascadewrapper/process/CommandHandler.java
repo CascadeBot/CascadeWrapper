@@ -2,6 +2,7 @@ package com.cascadebot.cascadewrapper.process;
 
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
+import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 
 public class CommandHandler {
 
@@ -14,6 +15,14 @@ public class CommandHandler {
     public void handleCommand(String[] args) {
         Operation o = Util.getSafeEnum(Operation.class, args[0]);
         if (o == null) {
+            if (args[0].equalsIgnoreCase("authorized")) {
+                if(WrapperSocketServer.waitingAuth.containsKey(args[1])) {
+                    WrapperSocketServer.authenticatedUsers.add(WrapperSocketServer.waitingAuth.get(args[1]));
+                }
+                WrapperSocketServer.waitingAuth.remove(args[1]);
+            } else if (args[0].equalsIgnoreCase("not_authorized")) {
+                WrapperSocketServer.waitingAuth.remove(args[1]);
+            }
             return;
         }
         switch (o) {
