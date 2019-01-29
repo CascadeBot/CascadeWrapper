@@ -96,8 +96,7 @@ public class WrapperSocketServer extends WebSocketServer {
                 JsonObject user = packet.getData().get("user").getAsJsonObject();
                 String id = user.get("id").getAsString();
                 String hmac = user.get("hmac").getAsString();
-                if(Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
-
+                if(!Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
                     return;
                 }
                 Process process = OperationRunnable.getInstance().getManager().getProcess();
