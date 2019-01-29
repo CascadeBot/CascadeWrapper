@@ -95,11 +95,15 @@ public class WrapperSocketServer extends WebSocketServer {
                 default:
             }
         } else {
-            if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("user")) { //TODO send errors
-                JsonObject user = packet.getData().get("user").getAsJsonObject();
-                verifyUser(user, conn);
+            if (packet.getOpCode() == OpCodes.AUTHORISE) { //TODO send errors
+                if(packet.getData().has("user")) {
+                    JsonObject user = packet.getData().get("user").getAsJsonObject();
+                    verifyUser(user, conn);
+                } else {
+                    sendError(conn, "Must specify user info to authenticate");
+                }
             } else {
-                sendError(conn, "Must specify user info to authenticate");
+                sendError(conn, "Not authorized!");
             }
         }
     }
@@ -127,7 +131,7 @@ public class WrapperSocketServer extends WebSocketServer {
                 JsonArray roles = jsonObject.getAsJsonArray("roles");
                 if(roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
                     authenticatedUsers.add(conn.getAttachment());
-                    LOGGER.info("Authorised user '" + getUserFromJson(user) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                    LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
                 } else {
                     sendError(conn, "User is not authorized to do this!");
                 }
