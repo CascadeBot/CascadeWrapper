@@ -28,7 +28,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 
 public class WrapperSocketServer extends WebSocketServer {
 
@@ -45,7 +48,7 @@ public class WrapperSocketServer extends WebSocketServer {
     }
 
     public static Set<SessionInfo> authenticatedUsers = new CopyOnWriteArraySet<>();
-    public static Map<String, SessionInfo> waitingAuth = new HashMap<>();
+    public static Map<String, WebSocket> waitingAuth = new HashMap<>();
     private Set<WebSocket> connections = new HashSet<>();
 
     @Override
@@ -92,50 +95,67 @@ public class WrapperSocketServer extends WebSocketServer {
                 default:
             }
         } else {
-            if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("user")) { //TODO send error
+            if (packet.getOpCode() == OpCodes.AUTHORISE && packet.getData().has("user")) { //TODO send errors
                 JsonObject user = packet.getData().get("user").getAsJsonObject();
-                String id = user.get("id").getAsString();
-                String hmac = user.get("hmac").getAsString();
-                if(!Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
-                    return;
-                }
-                Process process = OperationRunnable.getInstance().getManager().getProcess();
-                if (process == null || !process.isAlive()) {
-                    Request request = new Request.Builder()
-                            .url("https://discordapp.com/api/guilds/488394590458478602/members/" + id)
-                            .get()
-                            .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
-                            .build();
-
-                    try {
-                        Response response = Wrapper.getInstance().httpClient.newCall(request).execute();
-                        if(response.body() == null) return;
-                        String res = response.body().string();
-                        JsonObject jsonObject = new JsonParser().parse(res).getAsJsonObject();
-                        if(jsonObject.has("code")) return;
-                        JsonArray roles = jsonObject.getAsJsonArray("roles");
-                        if(roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
-                            authenticatedUsers.add(conn.getAttachment());
-                            LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                        }
-
-                    } catch (IOException e) {
-                        Wrapper.logger.error("Error checking user from discord", e);
-                        return;
-                    }
-
-                    return;
-                }
-
-                waitingAuth.put(id, conn.getAttachment());
-
-                PrintWriter writer = new PrintWriter(process.getOutputStream());
-                writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac);
-                writer.flush(); //Bot will now authenticate us
+                verifyUser(user, conn);
             } else {
-                sendError(conn, "Must specify token to authenticate");
+                sendError(conn, "Must specify user info to authenticate");
             }
         }
+    }
+
+    public void verifyUser(JsonObject user, WebSocket conn) {
+        String id = user.get("id").getAsString();
+        String hmac = user.get("hmac").getAsString();
+        if(!Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
+            return;
+        }
+        Process process = OperationRunnable.getInstance().getManager().getProcess();
+        if (process == null || !process.isAlive()) {
+            Request request = new Request.Builder()
+                    .url("https://discordapp.com/api/guilds/488394590458478602/members/" + id)
+                    .get()
+                    .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
+                    .build();
+
+            try {
+                Response response = Wrapper.getInstance().httpClient.newCall(request).execute();
+                if(response.body() == null) return;
+                String res = response.body().string();
+                JsonObject jsonObject = new JsonParser().parse(res).getAsJsonObject();
+                if(jsonObject.has("code")) return;
+                JsonArray roles = jsonObject.getAsJsonArray("roles");
+                if(roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
+                    authenticatedUsers.add(conn.getAttachment());
+                    LOGGER.info("Authorised user '" + getUserFromJson(user) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                } else {
+                    sendError(conn, "User is not authorized to do this!");
+                }
+
+            } catch (IOException e) {
+                Wrapper.logger.error("Error checking user from discord", e);
+                sendError(conn, "Error validating with discord");
+                return;
+            }
+
+            return;
+        }
+
+        waitingAuth.put(id, conn);
+
+        PrintWriter writer = new PrintWriter(process.getOutputStream());
+        writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac);
+        writer.flush(); //Bot will now authenticate us
+
+        new Timer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if(waitingAuth.containsKey(id)) {
+                    waitingAuth.remove(id);
+                    sendError(conn, "Auth timed out!");
+                }
+            }
+        }, TimeUnit.SECONDS.toMillis(10));
     }
 
     private String getUserFromJson(JsonObject object) {
