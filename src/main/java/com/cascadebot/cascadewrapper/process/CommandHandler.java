@@ -2,6 +2,7 @@ package com.cascadebot.cascadewrapper.process;
 
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
+import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 
 public class CommandHandler {
@@ -17,7 +18,8 @@ public class CommandHandler {
         if (o == null) {
             if (args[1].equalsIgnoreCase("authorized")) {
                 if(WrapperSocketServer.waitingAuth.containsKey(args[2])) {
-                    WrapperSocketServer.authenticatedUsers.add(WrapperSocketServer.waitingAuth.get(args[1]));
+                    WrapperSocketServer.authenticatedUsers.add(WrapperSocketServer.waitingAuth.get(args[2]));
+                    Wrapper.logger.info("Bot authorized user '" + args[2] + "'");
                 }
                 WrapperSocketServer.waitingAuth.remove(args[2]);
             } else if (args[1].equalsIgnoreCase("not_authorized")) {
