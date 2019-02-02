@@ -8,7 +8,6 @@ import com.cascadebot.shared.Auth;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -51,6 +50,8 @@ public class Wrapper {
 
     public String role;
 
+    private String guild;
+
     public static void main(String[] args) {
         (instance = new Wrapper()).init();
     }
@@ -71,6 +72,8 @@ public class Wrapper {
             System.exit(1);
             return;
         }
+
+        guild = config.getString("guild");
 
         botToken = config.getString("bot.token");
 
@@ -213,5 +216,9 @@ public class Wrapper {
 
     public String getUrl() {
         return url;
+    }
+
+    public String getGuild() {
+        return guild;
     }
 }

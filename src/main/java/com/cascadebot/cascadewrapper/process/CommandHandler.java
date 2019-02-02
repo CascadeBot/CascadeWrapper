@@ -3,7 +3,9 @@ package com.cascadebot.cascadewrapper.process;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
+import com.cascadebot.cascadewrapper.sockets.SessionInfo;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.java_websocket.WebSocket;
 
 public class CommandHandler {
 
@@ -18,11 +20,20 @@ public class CommandHandler {
         if (o == null) {
             if (args[1].equalsIgnoreCase("authorized")) {
                 if(WrapperSocketServer.waitingAuth.containsKey(args[2])) {
-                    WrapperSocketServer.authenticatedUsers.add(WrapperSocketServer.waitingAuth.get(args[2]).getAttachment());
-                    Wrapper.logger.info("Bot authorized user '" + args[2] + "'");
+                    WebSocket conn = WrapperSocketServer.waitingAuth.get(args[2]);
+
+                    SessionInfo info = conn.getAttachment();
+                    info.setSecurityLevel(args[3]);
+                    conn.setAttachment(info);
+
+                    WrapperSocketServer.authenticatedUsers.add(info);
+                    Wrapper.logger.info("Bot authorized user '" + args[2] + "' with level " + args[3]);
                 }
                 WrapperSocketServer.waitingAuth.remove(args[2]);
             } else if (args[1].equalsIgnoreCase("not_authorized")) {
+                if(!WrapperSocketServer.waitingAuth.containsKey(args[2])) {
+                    return;
+                }
                 WrapperSocketServer.getInstance().sendError(WrapperSocketServer.waitingAuth.get(args[2]), "User is not authorized to do this!");
                 WrapperSocketServer.waitingAuth.remove(args[2]);
             }
