@@ -22,10 +22,8 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
@@ -41,10 +39,12 @@ public class WrapperSocketServer extends WebSocketServer {
 
     public WrapperSocketServer() {
         super();
+        instance = this;
     }
 
     public WrapperSocketServer(InetSocketAddress address) {
         super(address);
+        instance = this;
     }
 
     public static Set<SessionInfo> authenticatedUsers = new CopyOnWriteArraySet<>();
@@ -67,20 +67,24 @@ public class WrapperSocketServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        ((SessionInfo) conn.getAttachment()).getRateLimiter().acquire(1);
+        SessionInfo sessionInfo = conn.getAttachment();
+        sessionInfo.getRateLimiter().acquire(1);
         Packet packet = Packet.fromJSON(message);
         if (packet == null) { // If the received packet is invalid
             LOGGER.warn("Received invalid json");
             sendError(conn, "Invalid JSON!");
             return;
         }
-        if (authenticatedUsers.contains(conn.getAttachment())) {
+        if (authenticatedUsers.contains(sessionInfo)) {
             switch (packet.getOpCode()) {
                 case OpCodes.WRAPPER_OPERATION:
                     if (packet.getData().has("operation")) {
                         String operation = packet.getData().get("operation").getAsString();
                         Operation o = Util.getSafeEnum(Operation.class, operation);
                         if (o != null) {
+                            if(!sessionInfo.getSecurityLevel().isAuthorised(o.getRequiredLevel())) {
+                                return;
+                            }
                             // If no build number is specified in the packet, the bot updates to the latest successful build
                             if ((o == Operation.UPDATE || o == Operation.FORCE_UPDATE) && packet.getData().has("build")) {
                                 o.setBuildNumber(packet.getData().get("build").getAsInt());
@@ -117,7 +121,7 @@ public class WrapperSocketServer extends WebSocketServer {
         Process process = OperationRunnable.getInstance().getManager().getProcess();
         if (process == null || !process.isAlive()) {
             Request request = new Request.Builder()
-                    .url("https://discordapp.com/api/guilds/488394590458478602/members/" + id)
+                    .url("https://discordapp.com/api/guilds/" + Wrapper.getInstance().getGuild() + "/members/" + id)
                     .get()
                     .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
                     .build();
@@ -130,7 +134,10 @@ public class WrapperSocketServer extends WebSocketServer {
                 if(jsonObject.has("code")) return;
                 JsonArray roles = jsonObject.getAsJsonArray("roles");
                 if(roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
-                    authenticatedUsers.add(conn.getAttachment());
+                    SessionInfo info = conn.getAttachment();
+                    info.setSecurityLevel("OWNER");
+                    conn.setAttachment(info);
+                    authenticatedUsers.add(info);
                     LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
                 } else {
                     sendError(conn, "User is not authorized to do this!");
