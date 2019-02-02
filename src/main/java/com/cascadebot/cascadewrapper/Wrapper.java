@@ -52,6 +52,8 @@ public class Wrapper {
 
     private String guild;
 
+    private Gson gson;
+
     public static void main(String[] args) {
         (instance = new Wrapper()).init();
     }
@@ -61,6 +63,8 @@ public class Wrapper {
     }
 
     private void init() {
+
+        gson = new GsonBuilder().create();
 
         httpClient = new OkHttpClient.Builder().build();
 
@@ -220,5 +224,9 @@ public class Wrapper {
 
     public String getGuild() {
         return guild;
+    }
+
+    public Gson getGson() {
+        return gson;
     }
 }

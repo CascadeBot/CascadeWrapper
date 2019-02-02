@@ -7,6 +7,7 @@ import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
 import com.cascadebot.shared.SharedConstants;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -82,7 +83,7 @@ public class WrapperSocketServer extends WebSocketServer {
                         String operation = packet.getData().get("operation").getAsString();
                         Operation o = Util.getSafeEnum(Operation.class, operation);
                         if (o != null) {
-                            if(!sessionInfo.getSecurityLevel().isAuthorised(o.getRequiredLevel())) {
+                            if (!sessionInfo.getSecurityLevel().isAuthorised(o.getRequiredLevel())) {
                                 return;
                             }
                             // If no build number is specified in the packet, the bot updates to the latest successful build
@@ -100,7 +101,7 @@ public class WrapperSocketServer extends WebSocketServer {
             }
         } else {
             if (packet.getOpCode() == OpCodes.AUTHORISE) { //TODO send errors
-                if(packet.getData().has("user")) {
+                if (packet.getData().has("user")) {
                     JsonObject user = packet.getData().get("user").getAsJsonObject();
                     verifyUser(user, conn);
                 } else {
@@ -115,38 +116,40 @@ public class WrapperSocketServer extends WebSocketServer {
     public void verifyUser(JsonObject user, WebSocket conn) {
         String id = user.get("id").getAsString();
         String hmac = user.get("hmac").getAsString();
-        if(!Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
+        if (!Wrapper.getInstance().auth.verifyEncrypt(id, hmac)) {
             return;
         }
+        Request request = new Request.Builder()
+                .url("https://discordapp.com/api/guilds/" + Wrapper.getInstance().getGuild() + "/members/" + id)
+                .get()
+                .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
+                .build();
+
+        String res;
+
+        try {
+            Response response = Wrapper.getInstance().httpClient.newCall(request).execute();
+            if (response.body() == null) return;
+            res = response.body().string();
+        } catch (IOException e) {
+            sendError(conn, "Error validating with discord");
+            return;
+        }
+
+        JsonObject jsonObject = new JsonParser().parse(res).getAsJsonObject();
+        if (jsonObject.has("code")) return;
+        JsonArray roles = jsonObject.getAsJsonArray("roles");
+
         Process process = OperationRunnable.getInstance().getManager().getProcess();
         if (process == null || !process.isAlive()) {
-            Request request = new Request.Builder()
-                    .url("https://discordapp.com/api/guilds/" + Wrapper.getInstance().getGuild() + "/members/" + id)
-                    .get()
-                    .addHeader("Authorization", "Bot " + Wrapper.getInstance().botToken)
-                    .build();
-
-            try {
-                Response response = Wrapper.getInstance().httpClient.newCall(request).execute();
-                if(response.body() == null) return;
-                String res = response.body().string();
-                JsonObject jsonObject = new JsonParser().parse(res).getAsJsonObject();
-                if(jsonObject.has("code")) return;
-                JsonArray roles = jsonObject.getAsJsonArray("roles");
-                if(roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
-                    SessionInfo info = conn.getAttachment();
-                    info.setSecurityLevel("OWNER");
-                    conn.setAttachment(info);
-                    authenticatedUsers.add(info);
-                    LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                } else {
-                    sendError(conn, "User is not authorized to do this!");
-                }
-
-            } catch (IOException e) {
-                Wrapper.logger.error("Error checking user from discord", e);
-                sendError(conn, "Error validating with discord");
-                return;
+            if (roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
+                SessionInfo info = conn.getAttachment();
+                info.setSecurityLevel("OWNER");
+                conn.setAttachment(info);
+                authenticatedUsers.add(info);
+                LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+            } else {
+                sendError(conn, "User is not authorized to do this!");
             }
 
             return;
@@ -154,14 +157,19 @@ public class WrapperSocketServer extends WebSocketServer {
 
         waitingAuth.put(id, conn);
 
+        String roleString = Wrapper.getInstance().getGson().toJson(roles);
+
+        roleString = roleString.replace("\n", "").replaceAll("\\s", "");
+        roleString = roleString.substring(1, roleString.length() - 2);
+
         PrintWriter writer = new PrintWriter(process.getOutputStream());
-        writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac);
+        writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac + " " + roleString);
         writer.flush(); //Bot will now authenticate us
 
         new Timer().schedule(new TimerTask() {
             @Override
             public void run() {
-                if(waitingAuth.containsKey(id)) {
+                if (waitingAuth.containsKey(id)) {
                     waitingAuth.remove(id);
                     sendError(conn, "Auth timed out!");
                 }
