@@ -148,6 +148,10 @@ public class WrapperSocketServer extends WebSocketServer {
                 conn.setAttachment(info);
                 authenticatedUsers.add(info);
                 LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
+                OperationJsonObject operationJson = new OperationJsonObject();
+                operationJson.add("authorized", true);
+                operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
+                conn.send(new Packet(OpCodes.AUTHORISE, operationJson.build()).toJSON()); //TODO make method user authenticated
             } else {
                 sendError(conn, "User is not authorized to do this!");
             }
@@ -157,7 +161,7 @@ public class WrapperSocketServer extends WebSocketServer {
 
         waitingAuth.put(id, conn);
 
-        String roleString = Wrapper.getInstance().getGson().toJson(roles);
+        String roleString = Wrapper.GSON.toJson(roles);
 
         roleString = roleString.replace("\n", "").replaceAll("\"","").replaceAll("\\s", "");
         roleString = roleString.substring(1, roleString.length() - 2);

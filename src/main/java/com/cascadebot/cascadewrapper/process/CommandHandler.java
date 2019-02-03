@@ -1,10 +1,13 @@
 package com.cascadebot.cascadewrapper.process;
 
 import com.cascadebot.cascadewrapper.Operation;
+import com.cascadebot.cascadewrapper.OperationJsonObject;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
+import com.cascadebot.cascadewrapper.sockets.Packet;
 import com.cascadebot.cascadewrapper.sockets.SessionInfo;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import com.cascadebot.shared.OpCodes;
 import org.java_websocket.WebSocket;
 
 public class CommandHandler {
@@ -25,6 +28,11 @@ public class CommandHandler {
                     SessionInfo info = conn.getAttachment();
                     info.setSecurityLevel(args[3]);
                     conn.setAttachment(info);
+
+                    OperationJsonObject operationJson = new OperationJsonObject();
+                    operationJson.add("authorized", true);
+                    operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
+                    conn.send(new Packet(OpCodes.AUTHORISE, operationJson.build()).toJSON());
 
                     WrapperSocketServer.authenticatedUsers.add(info);
                     Wrapper.logger.info("Bot authorized user '" + args[2] + "' with level " + args[3]);
