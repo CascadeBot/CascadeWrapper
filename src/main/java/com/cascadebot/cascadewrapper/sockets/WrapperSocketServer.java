@@ -159,7 +159,7 @@ public class WrapperSocketServer extends WebSocketServer {
 
         String roleString = Wrapper.getInstance().getGson().toJson(roles);
 
-        roleString = roleString.replace("\n", "").replaceAll("\\s", "");
+        roleString = roleString.replace("\n", "").replaceAll("\"","").replaceAll("\\s", "");
         roleString = roleString.substring(1, roleString.length() - 2);
 
         PrintWriter writer = new PrintWriter(process.getOutputStream());
