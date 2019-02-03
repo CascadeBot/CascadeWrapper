@@ -1,6 +1,6 @@
 package com.cascadebot.cascadewrapper.sockets;
 
-import com.cascadebot.cascadewrapper.JSONObject;
+import com.cascadebot.cascadewrapper.JsonBuilder;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
@@ -57,7 +57,7 @@ public class WrapperSocketServer extends WebSocketServer {
         conn.setAttachment(new SessionInfo());
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
         connections.add(conn);
-        conn.send(new Packet(OpCodes.CONNECTED, new JSONObject().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString())).toJSON());
+        conn.send(new Packet(OpCodes.CONNECTED, new JsonBuilder().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString())).toJSON());
     }
 
     @Override
@@ -148,7 +148,7 @@ public class WrapperSocketServer extends WebSocketServer {
                 conn.setAttachment(info);
                 authenticatedUsers.add(info);
                 LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                JSONObject operationJson = new JSONObject();
+                JsonBuilder operationJson = new JsonBuilder();
                 operationJson.add("authorized", true);
                 operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
                 conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON()); //TODO make method user authenticated
@@ -207,7 +207,7 @@ public class WrapperSocketServer extends WebSocketServer {
 
     public void sendError(WebSocket conn, String error) {
         conn.send(new Packet(
-                OpCodes.ERROR, new JSONObject().add("error", error)
+                OpCodes.ERROR, new JsonBuilder().add("error", error)
         ).toJSON());
     }
 

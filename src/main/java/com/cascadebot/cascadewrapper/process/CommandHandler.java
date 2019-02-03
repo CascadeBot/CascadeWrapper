@@ -1,7 +1,7 @@
 package com.cascadebot.cascadewrapper.process;
 
 import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.JSONObject;
+import com.cascadebot.cascadewrapper.JsonBuilder;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.sockets.Packet;
@@ -29,7 +29,7 @@ public class CommandHandler {
                     info.setSecurityLevel(args[3]);
                     conn.setAttachment(info);
 
-                    JSONObject operationJson = new JSONObject();
+                    JsonBuilder operationJson = new JsonBuilder();
                     operationJson.add("authorized", true);
                     operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
                     conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON());
