@@ -3,6 +3,7 @@ package com.cascadebot.cascadewrapper.readers;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.process.CommandHandler;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import com.cascadebot.shared.OpCodes;
 import com.cascadebot.shared.Regex;
 import com.cascadebot.shared.SharedConstants;
 
@@ -33,7 +34,7 @@ public class ConsoleReader implements Runnable {
                     line = Regex.MULTISPACE_REGEX.matcher(line).replaceAll(" ");
                     handler.handleCommand(line.split(" "));
                 } else {
-                    WrapperSocketServer.getInstance().sendToAll(line);
+                    WrapperSocketServer.getInstance().sendToAll(OpCodes.LOG, line);
                 }
             }
         } catch (IOException e) {

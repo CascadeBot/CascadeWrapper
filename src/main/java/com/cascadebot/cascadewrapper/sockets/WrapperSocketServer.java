@@ -213,16 +213,16 @@ public class WrapperSocketServer extends WebSocketServer {
         return connections;
     }
 
-    public void sendToAll(String data) {
-        sendToAll(data, SecurityLevel.STAFF);
+    public void sendToAll(int opCode, String data) {
+        sendToAll(opCode, data, SecurityLevel.STAFF);
     }
 
-    public void sendToAll(String data, SecurityLevel level) {
+    public void sendToAll(int opCode, String data, SecurityLevel level) {
         for(WebSocket conn : connections) {
             SecurityLevel connSecurity = ((SessionInfo)conn.getAttachment()).getSecurityLevel();
             if(connSecurity != null) {
                 if(connSecurity.isAuthorised(level)) {
-                    conn.send(new Packet(5, data).toJSON());
+                    conn.send(new Packet(opCode, data).toJSON());
                 }
             }
         }

@@ -2,6 +2,7 @@ package com.cascadebot.cascadewrapper.readers;
 
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import com.cascadebot.shared.OpCodes;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +23,7 @@ public class ErrorReader implements Runnable {
         String line;
         try {
             while ((line = reader.readLine()) != null && !Thread.interrupted()) {
-                WrapperSocketServer.getInstance().sendToAll(line);
+                WrapperSocketServer.getInstance().sendToAll(OpCodes.ERROR_LOG, line);
                 Wrapper.logger.error("Received uncaught error from bot: '" + line + "'");
             }
         } catch (IOException e) {
