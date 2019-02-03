@@ -2,6 +2,7 @@ package com.cascadebot.cascadewrapper.readers;
 
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.process.CommandHandler;
+import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.Regex;
 import com.cascadebot.shared.SharedConstants;
 
@@ -27,6 +28,7 @@ public class ConsoleReader implements Runnable {
         try {
             while ((line = reader.readLine()) != null && !Thread.interrupted()) {
                 Wrapper.logger.info("[Bot] " + line);
+                WrapperSocketServer.getInstance().sendToAll(line);
                 if(line.startsWith(SharedConstants.WRAPPER_OP_PREFIX)) {
                     Wrapper.logger.info("Received command from bot: " + line);
                     line = Regex.MULTISPACE_REGEX.matcher(line).replaceAll(" ");

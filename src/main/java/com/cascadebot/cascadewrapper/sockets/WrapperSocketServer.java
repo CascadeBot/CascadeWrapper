@@ -6,6 +6,7 @@ import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
+import com.cascadebot.shared.SecurityLevel;
 import com.cascadebot.shared.SharedConstants;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -214,6 +215,21 @@ public class WrapperSocketServer extends WebSocketServer {
     @Override
     public Set<WebSocket> getConnections() {
         return connections;
+    }
+
+    public void sendToAll(String info) {
+        sendToAll(info, SecurityLevel.STAFF);
+    }
+
+    public void sendToAll(String info, SecurityLevel level) {
+        for(WebSocket conn : connections) {
+            SecurityLevel connSecurity = ((SessionInfo)conn.getAttachment()).getSecurityLevel();
+            if(connSecurity != null) {
+                if(connSecurity.isAuthorised(level)) {
+                    conn.send(new Packet(5, new OperationJsonObject().add("info", info).build()).toJSON());
+                }
+            }
+        }
     }
 
     public static WrapperSocketServer getInstance() {
