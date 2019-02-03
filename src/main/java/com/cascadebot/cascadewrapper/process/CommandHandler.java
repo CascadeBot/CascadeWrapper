@@ -29,10 +29,7 @@ public class CommandHandler {
                     info.setSecurityLevel(args[3]);
                     conn.setAttachment(info);
 
-                    JsonBuilder operationJson = new JsonBuilder();
-                    operationJson.add("authorized", true);
-                    operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
-                    conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON());
+                    WrapperSocketServer.getInstance().sendAuthorisedPacket(conn);
 
                     WrapperSocketServer.authenticatedUsers.add(info);
                     Wrapper.logger.info("Bot authorized user '" + args[2] + "' with level " + args[3]);

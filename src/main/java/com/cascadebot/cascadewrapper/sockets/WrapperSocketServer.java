@@ -148,10 +148,7 @@ public class WrapperSocketServer extends WebSocketServer {
                 conn.setAttachment(info);
                 authenticatedUsers.add(info);
                 LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                JsonBuilder operationJson = new JsonBuilder();
-                operationJson.add("authorized", true);
-                operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
-                conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON()); //TODO make method user authenticated
+                sendAuthorisedPacket(conn); //TODO make method user authenticated
             } else {
                 sendError(conn, "User is not authorized to do this!");
             }
@@ -229,6 +226,13 @@ public class WrapperSocketServer extends WebSocketServer {
                 }
             }
         }
+    }
+
+    public void sendAuthorisedPacket(WebSocket conn) {
+        JsonBuilder operationJson = new JsonBuilder();
+        operationJson.add("authorized", true);
+        operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
+        conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON());
     }
 
     public static WrapperSocketServer getInstance() {
