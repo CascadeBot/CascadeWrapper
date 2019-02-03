@@ -1,5 +1,6 @@
 package com.cascadebot.cascadewrapper.sockets;
 
+import com.cascadebot.cascadewrapper.JSONObject;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -9,9 +10,14 @@ public class Packet {
     private final int opCode;
     private final JsonObject data;
 
-    public Packet(int opCode, JsonObject data) {
+    public Packet(int opCode, JSONObject data) {
         this.opCode = opCode;
-        this.data = data;
+        this.data = data.build();
+    }
+
+    public Packet(int opCode, String data) {
+        this.opCode = opCode;
+        this.data = new JSONObject().add("d", data).build();
     }
 
     public int getOpCode() {
