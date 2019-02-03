@@ -1,9 +1,10 @@
 package com.cascadebot.cascadewrapper.process;
 
-import com.cascadebot.cascadewrapper.ConsoleReader;
+import com.cascadebot.cascadewrapper.readers.ConsoleReader;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
+import com.cascadebot.cascadewrapper.readers.ErrorReader;
 import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.ExitCodes;
 import com.cascadebot.shared.Version;
@@ -43,6 +44,7 @@ public class ProcessManager {
     private ProcessStats processStats;
 
     private Thread consoleReaderThread;
+    private Thread errorReaderThread;
     private Thread processManagerThread;
 
     private boolean restartTimer = false;
@@ -106,9 +108,11 @@ public class ProcessManager {
     public void run() {
         try {
             (consoleReaderThread = new Thread(new ConsoleReader(process.getInputStream(), handler))).start();
+            (errorReaderThread = new Thread(new ErrorReader(process.getErrorStream()))).start();
 
             int exitCode = process.waitFor();
             consoleReaderThread.interrupt(); // Once the process has ended we need to stop this
+            errorReaderThread.interrupt();
 
             state.set(RunState.STOPPED);
 
