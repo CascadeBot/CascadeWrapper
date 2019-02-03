@@ -16,7 +16,6 @@ public class ProcessStats extends TimerTask {
     private long lastCpu = 0;
 
     public double cpu = 0;
-    public double ram = 0;
 
     public ProcessStats(ProcessManager manager) {
         this.manager = manager;
@@ -24,7 +23,7 @@ public class ProcessStats extends TimerTask {
     }
 
     @Override
-    public void run() { //TODO time based
+    public void run() {
         if (manager.getProcess() == null || manager.getState().get() == RunState.STOPPED) {
             return;
         }

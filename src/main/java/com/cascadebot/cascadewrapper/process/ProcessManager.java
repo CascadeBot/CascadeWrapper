@@ -40,6 +40,8 @@ public class ProcessManager {
     private AtomicReference<RunState> state = new AtomicReference<>();
     private long lastStartTime;
 
+    private ProcessStats processStats;
+
     private Thread consoleReaderThread;
     private Thread processManagerThread;
 
@@ -67,7 +69,7 @@ public class ProcessManager {
                 consoleReaderThread.interrupt();
             }
         }));
-        new ProcessStats(this);
+        processStats = new ProcessStats(this);
     }
 
     public void start() {
@@ -251,5 +253,9 @@ public class ProcessManager {
         String versionString = builder.toString();
         getLOGGER().debug(versionString);
         return Version.parseVer(versionString);
+    }
+
+    public ProcessStats getProcessStats() {
+        return processStats;
     }
 }
