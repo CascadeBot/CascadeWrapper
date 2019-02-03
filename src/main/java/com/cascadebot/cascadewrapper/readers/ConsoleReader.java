@@ -28,11 +28,12 @@ public class ConsoleReader implements Runnable {
         try {
             while ((line = reader.readLine()) != null && !Thread.interrupted()) {
                 Wrapper.logger.info("[Bot] " + line);
-                WrapperSocketServer.getInstance().sendToAll(line);
                 if(line.startsWith(SharedConstants.WRAPPER_OP_PREFIX)) {
                     Wrapper.logger.info("Received command from bot: " + line);
                     line = Regex.MULTISPACE_REGEX.matcher(line).replaceAll(" ");
                     handler.handleCommand(line.split(" "));
+                } else {
+                    WrapperSocketServer.getInstance().sendToAll(line);
                 }
             }
         } catch (IOException e) {
