@@ -1,6 +1,6 @@
 package com.cascadebot.cascadewrapper.sockets;
 
-import com.cascadebot.cascadewrapper.OperationJsonObject;
+import com.cascadebot.cascadewrapper.JSONObject;
 import com.cascadebot.cascadewrapper.Operation;
 import com.cascadebot.cascadewrapper.Util;
 import com.cascadebot.cascadewrapper.Wrapper;
@@ -8,7 +8,6 @@ import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
 import com.cascadebot.shared.SecurityLevel;
 import com.cascadebot.shared.SharedConstants;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -58,7 +57,7 @@ public class WrapperSocketServer extends WebSocketServer {
         conn.setAttachment(new SessionInfo());
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
         connections.add(conn);
-        conn.send(new Packet(OpCodes.CONNECTED, new OperationJsonObject().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString()).build()).toJSON());
+        conn.send(new Packet(OpCodes.CONNECTED, new JSONObject().add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString())).toJSON());
     }
 
     @Override
@@ -149,10 +148,10 @@ public class WrapperSocketServer extends WebSocketServer {
                 conn.setAttachment(info);
                 authenticatedUsers.add(info);
                 LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                OperationJsonObject operationJson = new OperationJsonObject();
+                JSONObject operationJson = new JSONObject();
                 operationJson.add("authorized", true);
                 operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
-                conn.send(new Packet(OpCodes.AUTHORISE, operationJson.build()).toJSON()); //TODO make method user authenticated
+                conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON()); //TODO make method user authenticated
             } else {
                 sendError(conn, "User is not authorized to do this!");
             }
@@ -208,7 +207,7 @@ public class WrapperSocketServer extends WebSocketServer {
 
     public void sendError(WebSocket conn, String error) {
         conn.send(new Packet(
-                OpCodes.ERROR, new OperationJsonObject().add("error", error).build()
+                OpCodes.ERROR, new JSONObject().add("error", error)
         ).toJSON());
     }
 
@@ -217,16 +216,16 @@ public class WrapperSocketServer extends WebSocketServer {
         return connections;
     }
 
-    public void sendToAll(String info) {
-        sendToAll(info, SecurityLevel.STAFF);
+    public void sendToAll(String data) {
+        sendToAll(data, SecurityLevel.STAFF);
     }
 
-    public void sendToAll(String info, SecurityLevel level) {
+    public void sendToAll(String data, SecurityLevel level) {
         for(WebSocket conn : connections) {
             SecurityLevel connSecurity = ((SessionInfo)conn.getAttachment()).getSecurityLevel();
             if(connSecurity != null) {
                 if(connSecurity.isAuthorised(level)) {
-                    conn.send(new Packet(5, new OperationJsonObject().add("info", info).build()).toJSON());
+                    conn.send(new Packet(5, data).toJSON());
                 }
             }
         }
