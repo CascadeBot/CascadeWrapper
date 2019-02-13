@@ -1,6 +1,6 @@
 # Cascade Wrapper
 
-Runs on JDA 11.
+Runs on Java 11.
 This program functions as the manager for CascadeBot and (eventually) the discord gateway the bot goes through.
 
 ### Project Owners
