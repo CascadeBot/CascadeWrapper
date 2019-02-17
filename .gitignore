@@ -13,6 +13,6 @@
 *.tar.gz
 
 target/
-*.yml
+config.yml
 
 cascadewrapper.iml

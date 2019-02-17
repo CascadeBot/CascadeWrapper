@@ -1,0 +1,26 @@
+# You can assume in this file everything is required for now unless specified otherwise
+
+cascade:
+  # The jenkins server to use for downloads
+  jenkins: ''
+  # Sentry dns (this isn't required)
+  sentry: ''
+
+bot:
+  # The token of the bot to use for getting owner info (Will also be used for the gateway later)
+  token: ''
+
+wrapper:
+  # Auth token to use for website/bot authentication
+  token: ''
+
+redis:
+  # IP of the redis server
+  host: ''
+  # optional password (this isn't required)
+  password: ''
+
+# Owner role id
+role: '488430613049769996'
+# Main guild ID
+guild: '488394590458478602'
