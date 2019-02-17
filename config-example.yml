@@ -17,6 +17,8 @@ wrapper:
 redis:
   # IP of the redis server
   host: ''
+  # Port redis is running on (default to 6379) (this isn't required)
+  port:
   # optional password (this isn't required)
   password: ''
 

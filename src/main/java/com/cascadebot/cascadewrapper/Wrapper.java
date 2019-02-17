@@ -13,6 +13,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,6 +40,7 @@ public class Wrapper {
     private static Wrapper instance;
     public static String cascadeWorkingDir;
     public Auth auth;
+    public JedisPool jedis;
 
     public OkHttpClient httpClient;
 
@@ -71,6 +75,12 @@ public class Wrapper {
             logger.error("Error loading config", e);
             System.exit(1);
             return;
+        }
+
+        if(config.contains("redis.password")) {
+            jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379), 1000, config.getString("redis.password"));
+        } else {
+            jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379));
         }
 
         guild = config.getString("guild");
