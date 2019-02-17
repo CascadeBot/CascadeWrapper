@@ -7,6 +7,7 @@ import java.io.IOException;
 public class ShutdownRunnable implements Runnable {
     @Override
     public void run() {
+        Wrapper.getInstance().jedis.close();
         Process proc = OperationRunnable.instance.manager.getProcess();
         if(proc != null) {
             Wrapper.logger.info("Shutting down bot with wrapper");

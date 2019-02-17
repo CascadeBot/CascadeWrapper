@@ -78,7 +78,7 @@ public class Wrapper {
         }
 
         if(config.contains("redis.password")) {
-            jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379), 1000, config.getString("redis.password"));
+            jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379), 1000, config.getString("redis.password"), config.getInt("redis.database", 0));
         } else {
             jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379));
         }

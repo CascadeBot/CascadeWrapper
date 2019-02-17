@@ -6,6 +6,7 @@ import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.OpCodes;
 import com.cascadebot.shared.Regex;
 import com.cascadebot.shared.SharedConstants;
+import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,6 +25,7 @@ public class ConsoleReader implements Runnable {
 
     @Override
     public void run() {
+        Jedis jedis = Wrapper.getInstance().jedis.getResource();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         try {
@@ -35,10 +37,12 @@ public class ConsoleReader implements Runnable {
                     handler.handleCommand(line.split(" "));
                 } else {
                     WrapperSocketServer.getInstance().sendToAll(OpCodes.LOG, line);
+                    jedis.set(String.valueOf(System.currentTimeMillis()), line);
                 }
             }
         } catch (IOException e) {
             Wrapper.logger.error("Error reading process log", e);
         }
+        jedis.close();
     }
 }

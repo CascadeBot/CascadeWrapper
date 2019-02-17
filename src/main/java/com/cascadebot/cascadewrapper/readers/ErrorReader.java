@@ -3,6 +3,7 @@ package com.cascadebot.cascadewrapper.readers;
 import com.cascadebot.cascadewrapper.Wrapper;
 import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.OpCodes;
+import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -19,15 +20,18 @@ public class ErrorReader implements Runnable {
 
     @Override
     public void run() {
+        Jedis jedis = Wrapper.getInstance().jedis.getResource();
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
         String line;
         try {
             while ((line = reader.readLine()) != null && !Thread.interrupted()) {
                 WrapperSocketServer.getInstance().sendToAll(OpCodes.ERROR_LOG, line);
                 Wrapper.logger.error("Received uncaught error from bot: '" + line + "'");
+                jedis.set(String.valueOf(System.currentTimeMillis()), line);
             }
         } catch (IOException e) {
             Wrapper.logger.error("Error reading process log", e);
         }
+        jedis.close();
     }
 }

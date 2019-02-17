@@ -21,6 +21,8 @@ redis:
   port:
   # optional password (this isn't required)
   password: ''
+  # optional database to use. if you want to use this you must have password, because jedis.
+  database:
 
 # Owner role id
 role: '488430613049769996'
