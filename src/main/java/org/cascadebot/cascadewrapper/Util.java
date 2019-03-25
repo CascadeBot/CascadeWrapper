@@ -1,6 +1,6 @@
 package org.cascadebot.cascadewrapper;
 
-import com.cascadebot.shared.SharedConstants;
+import org.cascadebot.shared.SharedConstants;
 
 public class Util {
 

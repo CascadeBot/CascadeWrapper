@@ -5,7 +5,6 @@ import org.cascadebot.cascadewrapper.Util;
 import org.cascadebot.cascadewrapper.Wrapper;
 import org.cascadebot.cascadewrapper.sockets.SessionInfo;
 import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import com.cascadebot.shared.OpCodes;
 import org.java_websocket.WebSocket;
 
 public class CommandHandler {

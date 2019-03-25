@@ -1,6 +1,6 @@
 package org.cascadebot.cascadewrapper;
 
-import com.cascadebot.shared.SecurityLevel;
+import org.cascadebot.shared.SecurityLevel;
 
 public enum Operation {
 

@@ -1,13 +1,13 @@
 package org.cascadebot.cascadewrapper.process;
 
-import org.cascadebot.cascadewrapper.readers.ConsoleReader;
 import org.cascadebot.cascadewrapper.Operation;
 import org.cascadebot.cascadewrapper.Util;
 import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.readers.ConsoleReader;
 import org.cascadebot.cascadewrapper.readers.ErrorReader;
 import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
-import com.cascadebot.shared.ExitCodes;
-import com.cascadebot.shared.Version;
+import org.cascadebot.shared.ExitCodes;
+import org.cascadebot.shared.Version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

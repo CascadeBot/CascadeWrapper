@@ -1,19 +1,19 @@
 package org.cascadebot.cascadewrapper.sockets;
 
-import org.cascadebot.cascadewrapper.JsonBuilder;
-import org.cascadebot.cascadewrapper.Operation;
-import org.cascadebot.cascadewrapper.Util;
-import org.cascadebot.cascadewrapper.Wrapper;
-import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
-import com.cascadebot.shared.OpCodes;
-import com.cascadebot.shared.SecurityLevel;
-import com.cascadebot.shared.SharedConstants;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.cascadebot.cascadewrapper.JsonBuilder;
+import org.cascadebot.cascadewrapper.Operation;
+import org.cascadebot.cascadewrapper.Util;
+import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import org.cascadebot.shared.OpCodes;
+import org.cascadebot.shared.SecurityLevel;
+import org.cascadebot.shared.SharedConstants;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;

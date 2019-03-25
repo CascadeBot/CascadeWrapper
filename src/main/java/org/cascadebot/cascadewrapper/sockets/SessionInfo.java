@@ -1,8 +1,8 @@
 package org.cascadebot.cascadewrapper.sockets;
 
-import org.cascadebot.cascadewrapper.Util;
-import com.cascadebot.shared.SecurityLevel;
 import com.google.common.util.concurrent.RateLimiter;
+import org.cascadebot.cascadewrapper.Util;
+import org.cascadebot.shared.SecurityLevel;
 
 import java.util.UUID;
 

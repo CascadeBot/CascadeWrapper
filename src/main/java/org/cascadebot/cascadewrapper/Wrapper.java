@@ -1,16 +1,16 @@
 package org.cascadebot.cascadewrapper;
 
-import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
-import org.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
-import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import org.cascadebot.cascadewrapper.utils.Downloader;
-import com.cascadebot.shared.Auth;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.OkHttpClient;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import org.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
+import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.cascadebot.cascadewrapper.utils.Downloader;
+import org.cascadebot.shared.Auth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;

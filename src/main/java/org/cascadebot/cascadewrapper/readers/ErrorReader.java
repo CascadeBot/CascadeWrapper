@@ -2,7 +2,7 @@ package org.cascadebot.cascadewrapper.readers;
 
 import org.cascadebot.cascadewrapper.Wrapper;
 import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import com.cascadebot.shared.OpCodes;
+import org.cascadebot.shared.OpCodes;
 import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;

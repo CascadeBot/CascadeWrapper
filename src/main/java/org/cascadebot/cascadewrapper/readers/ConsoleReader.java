@@ -3,9 +3,9 @@ package org.cascadebot.cascadewrapper.readers;
 import org.cascadebot.cascadewrapper.Wrapper;
 import org.cascadebot.cascadewrapper.process.CommandHandler;
 import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import com.cascadebot.shared.OpCodes;
-import com.cascadebot.shared.Regex;
-import com.cascadebot.shared.SharedConstants;
+import org.cascadebot.shared.OpCodes;
+import org.cascadebot.shared.Regex;
+import org.cascadebot.shared.SharedConstants;
 import redis.clients.jedis.Jedis;
 
 import java.io.BufferedReader;
