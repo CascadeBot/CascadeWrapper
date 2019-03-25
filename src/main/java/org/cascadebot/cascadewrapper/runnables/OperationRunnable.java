@@ -1,10 +1,10 @@
-package com.cascadebot.cascadewrapper.runnables;
+package org.cascadebot.cascadewrapper.runnables;
 
-import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.process.ProcessManager;
-import com.cascadebot.cascadewrapper.process.RunState;
-import com.cascadebot.cascadewrapper.Wrapper;
-import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.cascadebot.cascadewrapper.Operation;
+import org.cascadebot.cascadewrapper.process.ProcessManager;
+import org.cascadebot.cascadewrapper.process.RunState;
+import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
 import org.java_websocket.WebSocket;
 

@@ -1,7 +1,7 @@
-package com.cascadebot.cascadewrapper.sockets;
+package org.cascadebot.cascadewrapper.sockets;
 
-import com.cascadebot.cascadewrapper.JsonBuilder;
-import com.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.JsonBuilder;
+import org.cascadebot.cascadewrapper.Wrapper;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 

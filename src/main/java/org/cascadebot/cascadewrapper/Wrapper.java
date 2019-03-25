@@ -1,9 +1,9 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
 
-import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
-import com.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
-import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import com.cascadebot.cascadewrapper.utils.Downloader;
+import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import org.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
+import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.cascadebot.cascadewrapper.utils.Downloader;
 import com.cascadebot.shared.Auth;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -13,7 +13,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 

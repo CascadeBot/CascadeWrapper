@@ -1,6 +1,6 @@
-package com.cascadebot.cascadewrapper.runnables;
+package org.cascadebot.cascadewrapper.runnables;
 
-import com.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.Wrapper;
 
 import java.io.IOException;
 

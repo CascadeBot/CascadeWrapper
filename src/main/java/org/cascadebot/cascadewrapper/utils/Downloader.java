@@ -1,6 +1,6 @@
-package com.cascadebot.cascadewrapper.utils;
+package org.cascadebot.cascadewrapper.utils;
 
-import com.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.Wrapper;
 
 import java.io.File;
 import java.io.InputStream;

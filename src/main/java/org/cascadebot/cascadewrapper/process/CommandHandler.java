@@ -1,12 +1,10 @@
-package com.cascadebot.cascadewrapper.process;
+package org.cascadebot.cascadewrapper.process;
 
-import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.JsonBuilder;
-import com.cascadebot.cascadewrapper.Util;
-import com.cascadebot.cascadewrapper.Wrapper;
-import com.cascadebot.cascadewrapper.sockets.Packet;
-import com.cascadebot.cascadewrapper.sockets.SessionInfo;
-import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.cascadebot.cascadewrapper.Operation;
+import org.cascadebot.cascadewrapper.Util;
+import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.sockets.SessionInfo;
+import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
 import com.cascadebot.shared.OpCodes;
 import org.java_websocket.WebSocket;
 

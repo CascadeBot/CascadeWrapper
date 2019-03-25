@@ -1,6 +1,4 @@
-package com.cascadebot.cascadewrapper.process;
-
-import com.cascadebot.cascadewrapper.Wrapper;
+package org.cascadebot.cascadewrapper.process;
 
 import java.math.BigDecimal;
 import java.math.MathContext;

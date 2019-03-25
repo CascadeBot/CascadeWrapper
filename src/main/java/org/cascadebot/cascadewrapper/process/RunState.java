@@ -1,4 +1,4 @@
-package com.cascadebot.cascadewrapper.process;
+package org.cascadebot.cascadewrapper.process;
 
 public enum RunState {
 

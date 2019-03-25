@@ -1,4 +1,4 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;

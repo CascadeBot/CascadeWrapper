@@ -1,10 +1,10 @@
-package com.cascadebot.cascadewrapper.sockets;
+package org.cascadebot.cascadewrapper.sockets;
 
-import com.cascadebot.cascadewrapper.JsonBuilder;
-import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.Util;
-import com.cascadebot.cascadewrapper.Wrapper;
-import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import org.cascadebot.cascadewrapper.JsonBuilder;
+import org.cascadebot.cascadewrapper.Operation;
+import org.cascadebot.cascadewrapper.Util;
+import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import com.cascadebot.shared.OpCodes;
 import com.cascadebot.shared.SecurityLevel;
 import com.cascadebot.shared.SharedConstants;

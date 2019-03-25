@@ -1,6 +1,6 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
 
-import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
 import spark.Spark;
 
 public class Web {

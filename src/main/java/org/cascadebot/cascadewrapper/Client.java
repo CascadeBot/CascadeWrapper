@@ -1,11 +1,7 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Scanner;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;

@@ -1,4 +1,4 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
 
 import com.cascadebot.shared.SecurityLevel;
 
