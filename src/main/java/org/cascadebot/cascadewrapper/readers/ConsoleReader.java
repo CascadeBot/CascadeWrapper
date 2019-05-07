@@ -1,5 +1,8 @@
 package org.cascadebot.cascadewrapper.readers;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import org.cascadebot.cascadewrapper.Wrapper;
 import org.cascadebot.cascadewrapper.process.CommandHandler;
 import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
@@ -17,10 +20,12 @@ public class ConsoleReader implements Runnable {
 
     private final InputStream inputStream;
     private final CommandHandler handler;
+    private JsonParser parser;
 
     public ConsoleReader(InputStream inputStream, CommandHandler handler) {
        this.inputStream = inputStream;
        this.handler = handler;
+       parser = new JsonParser();
     }
 
     @Override
@@ -36,7 +41,12 @@ public class ConsoleReader implements Runnable {
                     line = Regex.MULTISPACE_REGEX.matcher(line).replaceAll(" ");
                     handler.handleCommand(line.split(" "));
                 } else {
-                    WrapperSocketServer.getInstance().sendToAll(OpCodes.LOG, line);
+                    try {
+                        JsonObject object = parser.parse(line).getAsJsonObject();
+                        WrapperSocketServer.getInstance().sendLog(object);
+                    } catch (JsonParseException e) {
+                        WrapperSocketServer.getInstance().sendToAll(OpCodes.LOG, line);
+                    }
                     jedis.set(String.valueOf(System.currentTimeMillis()), line);
                 }
             }
