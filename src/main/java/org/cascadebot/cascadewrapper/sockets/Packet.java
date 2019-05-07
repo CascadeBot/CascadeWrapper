@@ -15,6 +15,11 @@ public class Packet {
         this.data = data.build();
     }
 
+    public Packet(int opCode, JsonObject object) {
+        this.opCode = opCode;
+        this.data = object;
+    }
+
     public Packet(int opCode, String data) {
         this.opCode = opCode;
         this.data = new JsonBuilder().add("d", data).build();

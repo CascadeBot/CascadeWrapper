@@ -228,6 +228,17 @@ public class WrapperSocketServer extends WebSocketServer {
         }
     }
 
+    public void sendLog(JsonObject json) {
+        for(WebSocket conn : connections) {
+            SecurityLevel connSecurity = ((SessionInfo) conn.getAttachment()).getSecurityLevel();
+            if (connSecurity != null) {
+                if(connSecurity.isAuthorised(SecurityLevel.DEVELOPER)) {
+                    conn.send(new Packet(OpCodes.LOG, json).toJSON());
+                }
+            }
+        }
+    }
+
     public void sendAuthorisedPacket(WebSocket conn) {
         JsonBuilder operationJson = new JsonBuilder();
         operationJson.add("authorized", true);

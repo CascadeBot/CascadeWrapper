@@ -3,7 +3,7 @@
 cascade:
   # The jenkins server to use for downloads
   jenkins: ''
-  # Sentry dns (this isn't required)
+  # Sentry dsn (this isn't required)
   sentry: ''
 
 bot:

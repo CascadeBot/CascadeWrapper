@@ -82,6 +82,11 @@ public class Wrapper {
             jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379));
         }
 
+        if(config.contains("cascade.sentry")) {
+            System.setProperty("SENTRY_DSN", config.getString("cascade.sentry"));
+            logger.info("Set sentry system property");
+        }
+
         guild = config.getString("guild");
 
         botToken = config.getString("bot.token");
