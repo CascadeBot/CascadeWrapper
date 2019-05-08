@@ -160,7 +160,7 @@ public class WrapperSocketServer extends WebSocketServer {
 
         String roleString = Wrapper.GSON.toJson(roles);
 
-        roleString = roleString.replace("\n", "").replaceAll("\"","").replaceAll("\\s", "");
+        roleString = roleString.replace("\n", "").replaceAll("\"", "").replaceAll("\\s", "");
         roleString = roleString.substring(1, roleString.length() - 2);
 
         PrintWriter writer = new PrintWriter(process.getOutputStream());
@@ -218,10 +218,21 @@ public class WrapperSocketServer extends WebSocketServer {
     }
 
     public void sendToAll(int opCode, String data, SecurityLevel level) {
-        for(WebSocket conn : connections) {
-            SecurityLevel connSecurity = ((SessionInfo)conn.getAttachment()).getSecurityLevel();
-            if(connSecurity != null) {
-                if(connSecurity.isAuthorised(level)) {
+        for (WebSocket conn : connections) {
+            SecurityLevel connSecurity = ((SessionInfo) conn.getAttachment()).getSecurityLevel();
+            if (connSecurity != null) {
+                if (connSecurity.isAuthorised(level)) {
+                    conn.send(new Packet(opCode, data).toJSON());
+                }
+            }
+        }
+    }
+
+    public void sendToAll(int opCode, JsonObject data, SecurityLevel level) {
+        for (WebSocket conn : connections) {
+            SecurityLevel connSecurity = ((SessionInfo) conn.getAttachment()).getSecurityLevel();
+            if (connSecurity != null) {
+                if (connSecurity.isAuthorised(level)) {
                     conn.send(new Packet(opCode, data).toJSON());
                 }
             }
@@ -229,20 +240,13 @@ public class WrapperSocketServer extends WebSocketServer {
     }
 
     public void sendLog(JsonObject json) {
-        for(WebSocket conn : connections) {
-            SecurityLevel connSecurity = ((SessionInfo) conn.getAttachment()).getSecurityLevel();
-            if (connSecurity != null) {
-                if(connSecurity.isAuthorised(SecurityLevel.DEVELOPER)) {
-                    conn.send(new Packet(OpCodes.LOG, json).toJSON());
-                }
-            }
-        }
+        sendToAll(OpCodes.LOG, json, SecurityLevel.DEVELOPER);
     }
 
     public void sendAuthorisedPacket(WebSocket conn) {
         JsonBuilder operationJson = new JsonBuilder();
         operationJson.add("authorized", true);
-        operationJson.add("sessionid", ((SessionInfo)conn.getAttachment()).getUuid().toString());
+        operationJson.add("sessionid", ((SessionInfo) conn.getAttachment()).getUuid().toString());
         conn.send(new Packet(OpCodes.AUTHORISE, operationJson).toJSON());
     }
 
