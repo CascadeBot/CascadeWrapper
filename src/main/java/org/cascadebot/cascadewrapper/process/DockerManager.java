@@ -68,7 +68,6 @@ public class DockerManager {
         dockerClient.startContainer(container.id());
         state.set(RunState.STARTED);
 
-        LogStream logStream = dockerClient.attachContainer(container.id());
         new Thread(new DockerConsoleReader(this)).start();
     }
 
@@ -88,10 +87,9 @@ public class DockerManager {
                 state.set(RunState.STOPPED);
                 dockerClient.removeContainer(container.id());
             } else {
+                // TODO: Find a way to pass in STDIN or something else, this won't work
                 dockerClient.execCreate(container.id(), new String[]{Util.getBotCommand("STOP", new String[0])});
-                while (dockerClient.inspectContainer(container.id()).state().running()) {
-                    //Wait for bot to stop
-                }
+                dockerClient.waitContainer(container.id());
                 state.set(RunState.STOPPED);
                 dockerClient.removeContainer(container.id());
                 //TODO detect when container is stopped
