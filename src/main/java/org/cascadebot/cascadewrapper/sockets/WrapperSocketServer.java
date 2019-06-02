@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.exceptions.DockerException;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.cascadebot.cascadewrapper.JsonBuilder;
@@ -140,15 +142,16 @@ public class WrapperSocketServer extends WebSocketServer {
         if (jsonObject.has("code")) return;
         JsonArray roles = jsonObject.getAsJsonArray("roles");
 
-        Process process = OperationRunnable.getInstance().getManager().getProcess();
-        if (process == null || !process.isAlive()) {
+        DockerClient dockerClient = OperationRunnable.getInstance().getManager().getDockerClient();
+
+        if (OperationRunnable.getInstance().getManager().getContainerId() == null) {
             if (roles.contains(new JsonPrimitive(Wrapper.getInstance().role))) {
                 SessionInfo info = conn.getAttachment();
                 info.setSecurityLevel("OWNER");
                 conn.setAttachment(info);
                 authenticatedUsers.add(info);
                 LOGGER.info("Authorised user '" + getUserFromJson(jsonObject.getAsJsonObject("user")) + "' with address: " + conn.getRemoteSocketAddress().toString() + " and session ID: " + ((SessionInfo) conn.getAttachment()).getUuid());
-                sendAuthorisedPacket(conn); //TODO make method user authenticated
+                sendAuthorisedPacket(conn);
             } else {
                 sendError(conn, "User is not authorized to do this!");
             }
@@ -163,9 +166,11 @@ public class WrapperSocketServer extends WebSocketServer {
         roleString = roleString.replace("\n", "").replaceAll("\"", "").replaceAll("\\s", "");
         roleString = roleString.substring(1, roleString.length() - 2);
 
-        PrintWriter writer = new PrintWriter(process.getOutputStream());
-        writer.println(SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac + " " + roleString);
-        writer.flush(); //Bot will now authenticate us
+        try {
+            dockerClient.execCreate(OperationRunnable.getInstance().getManager().getContainerId(), new String[]{SharedConstants.BOT_OP_PREFIX + " user " + id + " " + hmac + " " + roleString});
+        } catch (DockerException | InterruptedException e) {
+            e.printStackTrace();
+        }
 
         new Timer().schedule(new TimerTask() {
             @Override

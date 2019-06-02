@@ -65,7 +65,7 @@ public class ProcessManager {
         this.fileName = filename;
         this.args = args;
         state.set(RunState.STOPPED);
-        handler = new CommandHandler(this);
+        //handler = new CommandHandler(this);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             if(consoleReaderThread != null) {
                 consoleReaderThread.interrupt();

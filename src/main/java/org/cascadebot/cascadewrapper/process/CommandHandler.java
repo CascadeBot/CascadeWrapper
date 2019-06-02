@@ -1,5 +1,7 @@
 package org.cascadebot.cascadewrapper.process;
 
+import com.spotify.docker.client.DockerClient;
+import com.spotify.docker.client.exceptions.DockerException;
 import org.cascadebot.cascadewrapper.Operation;
 import org.cascadebot.cascadewrapper.Util;
 import org.cascadebot.cascadewrapper.Wrapper;
@@ -9,9 +11,9 @@ import org.java_websocket.WebSocket;
 
 public class CommandHandler {
 
-    private ProcessManager manager;
+    private DockerManager manager;
 
-    public CommandHandler(ProcessManager manager) {
+    public CommandHandler(DockerManager manager) {
         this.manager = manager;
     }
 
@@ -43,17 +45,19 @@ public class CommandHandler {
         }
         switch (o) {
             case STOP:
-                manager.getState().set(RunState.STOPPING);
-                break;
             case RESTART:
                 manager.getState().set(RunState.STOPPING);
                 break;
             case UPDATE:
                 int build = Integer.valueOf(args[1]);
-                manager.handleUpdate(build);
+                try {
+                    manager.handleUpdate();
+                } catch (DockerException | InterruptedException e) {
+                    e.printStackTrace();
+                }
                 break;
             default:
-                manager.getLOGGER().info("Received invalid operation from bot: " + o.name());
+                DockerManager.getLOGGER().info("Received invalid operation from bot: " + o.name());
         }
     }
 }

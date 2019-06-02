@@ -1,7 +1,10 @@
 package org.cascadebot.cascadewrapper.runnables;
 
+import com.spotify.docker.client.exceptions.DockerCertificateException;
+import com.spotify.docker.client.exceptions.DockerException;
 import org.cascadebot.cascadewrapper.Operation;
 import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.process.DockerManager;
 import org.cascadebot.cascadewrapper.process.ProcessManager;
 import org.cascadebot.cascadewrapper.process.RunState;
 import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
@@ -19,13 +22,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class OperationRunnable implements Runnable {
 
     private static BlockingQueue<Operation> operationQueue = new LinkedBlockingQueue<>();
-    protected ProcessManager manager;
+    protected DockerManager manager;
 
     protected static OperationRunnable instance;
 
     public OperationRunnable() {
         instance = this;
-        manager = new ProcessManager("CascadeBot-jar-with-dependencies.jar", new String[]{}); //TODO mayBe add config options for file names
+        try {
+            manager = new DockerManager();
+        } catch (DockerCertificateException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void queueOperation(Operation operation) {
@@ -49,7 +56,11 @@ public class OperationRunnable implements Runnable {
                                 Wrapper.logger.warn("Start operation tried to be triggered when the process wasn't stopped");
                                 return;
                             }
-                            manager.start();
+                            try {
+                                manager.start();
+                            } catch (DockerException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         case STOP:
                             if(!manager.getState().get().equals(RunState.STARTED)) {
@@ -81,22 +92,38 @@ public class OperationRunnable implements Runnable {
                                 //Do nothing
                             }
                             started.set(true);
-                            manager.start();
+                            try {
+                                manager.start();
+                            } catch (DockerException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         case UPDATE:
                             Wrapper.logger.info("Update called from wrapper.");
-                            manager.handleUpdate(operation.getBuildNumber());
+                            try {
+                                manager.handleUpdate();
+                            } catch (DockerException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         case FORCE_STOP:
                             manager.stop(true);
                             break;
                         case FORCE_RESTART:
                             manager.stop(true);
-                            manager.start();
+                            try {
+                                manager.start();
+                            } catch (DockerException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         case FORCE_UPDATE:
                             manager.stop(true);
-                            manager.handleUpdate(operation.getBuildNumber());
+                            try {
+                                manager.handleUpdate();
+                            } catch (DockerException | InterruptedException e) {
+                                e.printStackTrace();
+                            }
                             break;
                         case WRAPPER_STOP:
                             System.exit(0);
@@ -112,7 +139,7 @@ public class OperationRunnable implements Runnable {
         return instance;
     }
 
-    public ProcessManager getManager() {
+    public DockerManager getManager() {
         return manager;
     }
 }

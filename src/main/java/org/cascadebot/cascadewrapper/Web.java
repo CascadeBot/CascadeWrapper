@@ -20,7 +20,8 @@ public class Web {
 
             Spark.get("/stats", (req, res) -> { //Stuff like cpu usage (might merge this with the other one)
                 res.type("application/json");
-                return Wrapper.GSON.toJson(OperationRunnable.getInstance().getManager().getProcessStats());
+                return "{}";
+                        //Wrapper.GSON.toJson(OperationRunnable.getInstance().getManager().getProcessStats());
             });
 
             Spark.get("/logs", (req, res) -> { //Logs!

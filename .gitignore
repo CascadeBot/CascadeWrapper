@@ -16,3 +16,5 @@ target/
 config.yml
 
 cascadewrapper.iml
+
+bot_files/
