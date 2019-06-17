@@ -10,6 +10,8 @@ import com.spotify.docker.client.messages.ContainerConfig;
 import com.spotify.docker.client.messages.ContainerCreation;
 import com.spotify.docker.client.messages.HostConfig;
 import com.spotify.docker.client.messages.PortBinding;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +29,8 @@ public class DockerManager {
     private DockerClient dockerClient;
     private ContainerCreation container;
 
+    public CommandHandler commandHandler;
+
     private AtomicReference<RunState> state = new AtomicReference<>();
 
     public DockerManager() throws DockerCertificateException {
@@ -39,7 +43,7 @@ public class DockerManager {
         dockerClient.pull("cascadebot/cascadebot"); //TODO handle versions, and restarting
     }
 
-    public void start() throws DockerException, InterruptedException {
+    public void start() throws DockerException, InterruptedException, IOException {
         try {
             dockerClient.inspectImage("cascadebot/cascadebot:1.0"); //TODO not hardcode this
         } catch (ImageNotFoundException e) {
@@ -64,6 +68,7 @@ public class DockerManager {
                 .build();
 
         container = dockerClient.createContainer(containerConfig);
+        dockerClient.copyToContainer(new File("bot_files").toPath(), container.id(), "/");
         state.set(RunState.STARTING);
         dockerClient.startContainer(container.id());
         state.set(RunState.STARTED);

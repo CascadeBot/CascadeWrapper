@@ -2,6 +2,7 @@ package org.cascadebot.cascadewrapper.runnables;
 
 import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
+import java.io.IOException;
 import org.cascadebot.cascadewrapper.Operation;
 import org.cascadebot.cascadewrapper.Wrapper;
 import org.cascadebot.cascadewrapper.process.DockerManager;
@@ -58,7 +59,7 @@ public class OperationRunnable implements Runnable {
                             }
                             try {
                                 manager.start();
-                            } catch (DockerException | InterruptedException e) {
+                            } catch (DockerException | InterruptedException | IOException e) {
                                 e.printStackTrace();
                             }
                             break;
@@ -94,7 +95,7 @@ public class OperationRunnable implements Runnable {
                             started.set(true);
                             try {
                                 manager.start();
-                            } catch (DockerException | InterruptedException e) {
+                            } catch (DockerException | InterruptedException | IOException e) {
                                 e.printStackTrace();
                             }
                             break;
@@ -113,7 +114,7 @@ public class OperationRunnable implements Runnable {
                             manager.stop(true);
                             try {
                                 manager.start();
-                            } catch (DockerException | InterruptedException e) {
+                            } catch (DockerException | InterruptedException | IOException e) {
                                 e.printStackTrace();
                             }
                             break;

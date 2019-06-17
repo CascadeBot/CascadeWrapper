@@ -28,3 +28,6 @@ redis:
 role: '488430613049769996'
 # Main guild ID
 guild: '488394590458478602'
+
+docker:
+  socket: 'tcp://localhost:2375'

@@ -15,6 +15,7 @@ public class CommandHandler {
 
     public CommandHandler(DockerManager manager) {
         this.manager = manager;
+        manager.commandHandler = this;
     }
 
     public void handleCommand(String[] args) {

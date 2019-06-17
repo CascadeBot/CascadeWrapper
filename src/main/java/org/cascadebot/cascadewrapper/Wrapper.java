@@ -55,6 +55,8 @@ public class Wrapper {
 
     private String guild;
 
+    private String dockerSocket;
+
     public static void main(String[] args) {
         (instance = new Wrapper()).init();
     }
@@ -106,6 +108,8 @@ public class Wrapper {
         } catch (NoSuchAlgorithmException | InvalidKeyException e) {
             logger.error("Error creating auth", e);
         }
+
+        dockerSocket = config.getString("docker.socket");
 
         File dir = new File(cascadeWorkingDir);
         if (!dir.exists()) {
@@ -234,5 +238,9 @@ public class Wrapper {
 
     public String getGuild() {
         return guild;
+    }
+
+    public String getDockerSocket() {
+        return dockerSocket;
     }
 }
