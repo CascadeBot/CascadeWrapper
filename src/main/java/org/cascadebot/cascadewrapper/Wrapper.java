@@ -1,22 +1,30 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
 
-import com.cascadebot.cascadewrapper.runnables.OperationRunnable;
-import com.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
-import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import com.cascadebot.cascadewrapper.utils.Downloader;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import okhttp3.OkHttpClient;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.cascadebot.cascadewrapper.runnables.OperationRunnable;
+import org.cascadebot.cascadewrapper.runnables.ShutdownRunnable;
+import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.cascadebot.cascadewrapper.utils.Downloader;
+import org.cascadebot.shared.Auth;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,13 +38,22 @@ public class Wrapper {
     public static final Logger logger = LoggerFactory.getLogger(Wrapper.class);
     private static Wrapper instance;
     public static String cascadeWorkingDir;
-    public String token;
+    public Auth auth;
+    public JedisPool jedis;
+
+    public OkHttpClient httpClient;
 
     public static boolean firstInitDone = true;
 
     public WrapperSocketServer server;
 
-    private List<String> urls;
+    private String url;
+
+    public String botToken;
+
+    public String role;
+
+    private String guild;
 
     public static void main(String[] args) {
         (instance = new Wrapper()).init();
@@ -47,10 +64,8 @@ public class Wrapper {
     }
 
     private void init() {
-        new Thread(new OperationRunnable()).start();
 
-        server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
-        server.start();
+        httpClient = new OkHttpClient.Builder().build();
 
         FileConfiguration config = new YamlConfiguration();
         try {
@@ -61,11 +76,36 @@ public class Wrapper {
             return;
         }
 
+        if(config.contains("redis.password")) {
+            jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379), 1000, config.getString("redis.password"), config.getInt("redis.database", 0));
+        } else {
+            jedis = new JedisPool(new JedisPoolConfig(), config.getString("redis.host"), config.getInt("redis.port", 6379));
+        }
+
+        if(config.contains("cascade.sentry")) {
+            System.setProperty("SENTRY_DSN", config.getString("cascade.sentry"));
+            logger.info("Set sentry system property");
+        }
+
+        guild = config.getString("guild");
+
+        botToken = config.getString("bot.token");
+
+        role = config.getString("role");
+
+        url = config.getString("cascade.jenkins");
         cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
 
-        urls = config.getStringList("cascade.downloads");
+        new Thread(new OperationRunnable()).start();
 
-        token = config.getString("wrapper.token");
+        server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
+        server.start();
+
+        try {
+            auth = new Auth(config.getString("wrapper.token"));
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            logger.error("Error creating auth", e);
+        }
 
         File dir = new File(cascadeWorkingDir);
         if (!dir.exists()) {
@@ -87,7 +127,7 @@ public class Wrapper {
             return;
         }
 
-        if(downloadFiles()) {
+        if(downloadFiles(-1)) {
 
             logger.info("First init done. please go and edit your bots config.");
             System.exit(0);
@@ -97,7 +137,30 @@ public class Wrapper {
         }
     }
 
-    public boolean downloadFiles() {
+    public boolean downloadFiles(int build) {
+        List<String> urls = new ArrayList<>();
+        URL versionUrl;
+        if(build == -1) {
+            urls.add(url + "/lastSuccessfulBuild/artifact/target/CascadeBot-jar-with-dependencies.jar");
+            urls.add(url + "/lastSuccessfulBuild/artifact/config.example.yml");
+            try {
+                versionUrl = new URL(url + "/lastSuccessfulBuild/artifact/target/classes/version.txt");
+            } catch (MalformedURLException e) {
+                logger.error("Invalid jenkins url", e);
+                return false;
+            }
+        } else {
+            urls.add(url + "/" + build + "/artifact/target/CascadeBot-jar-with-dependencies.jar");
+            urls.add(url + "/" + build + "/artifact/config.example.yml");
+            try {
+                versionUrl = new URL(url + "/" + build + "/artifact/target/classes/version.txt");
+            } catch (MalformedURLException e) {
+                logger.error("Invalid jenkins url", e);
+                return false;
+            }
+
+        }
+
         boolean downloadDone = false;
         AtomicBoolean error = new AtomicBoolean(false);
         List<Downloader> downloaders = new ArrayList<>();
@@ -148,6 +211,14 @@ public class Wrapper {
             firstInitDone = done;
         }
 
+        try {
+            logger.info("Downloading version file");
+            Files.copy(versionUrl.openStream(), new File(cascadeWorkingDir, "version.txt").toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            logger.error("Error downloading version file.", e);
+            return false;
+        }
+
         return !error.get();
 
     }
@@ -155,5 +226,13 @@ public class Wrapper {
     private String getName(String url) {
         String[] split = url.split("/");
         return split[split.length - 1];
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getGuild() {
+        return guild;
     }
 }

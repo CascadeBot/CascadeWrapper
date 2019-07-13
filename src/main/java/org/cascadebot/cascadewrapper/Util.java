@@ -1,4 +1,6 @@
-package com.cascadebot.cascadewrapper;
+package org.cascadebot.cascadewrapper;
+
+import org.cascadebot.shared.SharedConstants;
 
 public class Util {
 
@@ -8,6 +10,10 @@ public class Util {
         } catch (IllegalArgumentException e) {
             return null;
         }
+    }
+
+    public static String getBotCommand(String command, String[] args) {
+        return SharedConstants.BOT_OP_PREFIX + " " + command + String.join(" ", args);
     }
 
 }

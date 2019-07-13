@@ -1,6 +1,6 @@
-package com.cascadebot.cascadewrapper.utils;
+package org.cascadebot.cascadewrapper.utils;
 
-import com.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.Wrapper;
 
 import java.io.File;
 import java.io.InputStream;
@@ -71,6 +71,7 @@ public class Downloader implements Runnable {
 
         try {
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0 Cascade Discord Bot");
             connection.setRequestProperty("Range", "bytes=" + downloaded + "-");
 
             connection.connect();

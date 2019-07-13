@@ -1,12 +1,12 @@
-package com.cascadebot.cascadewrapper.runnables;
+package org.cascadebot.cascadewrapper.runnables;
 
-import com.cascadebot.cascadewrapper.Operation;
-import com.cascadebot.cascadewrapper.RunState;
-import com.cascadebot.cascadewrapper.Wrapper;
-import com.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
-import com.cascadebot.shared.utils.ThreadPoolExecutorLogged;
+import org.cascadebot.cascadewrapper.Operation;
+import org.cascadebot.cascadewrapper.Wrapper;
+import org.cascadebot.cascadewrapper.process.ProcessManager;
+import org.cascadebot.cascadewrapper.process.RunState;
+import org.cascadebot.cascadewrapper.sockets.WrapperSocketServer;
+import org.cascadebot.shared.utils.ThreadPoolExecutorLogged;
 import org.java_websocket.WebSocket;
-import org.java_websocket.server.WebSocketServer;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -44,10 +44,6 @@ public class OperationRunnable implements Runnable {
                 Wrapper.logger.info("Operation: " + operation);
                 threadPool.submit(() -> {
                     switch (operation) {
-
-                        case NOOP:
-                            //TODO figure out what this is suppose to do (looking at you binary)
-                            break;
                         case START:
                             if(!manager.getState().get().equals(RunState.STOPPED)) {
                                 Wrapper.logger.warn("Start operation tried to be triggered when the process wasn't stopped");
@@ -88,7 +84,8 @@ public class OperationRunnable implements Runnable {
                             manager.start();
                             break;
                         case UPDATE:
-                            manager.handleUpdate();
+                            Wrapper.logger.info("Update called from wrapper.");
+                            manager.handleUpdate(operation.getBuildNumber());
                             break;
                         case FORCE_STOP:
                             manager.stop(true);
@@ -99,7 +96,7 @@ public class OperationRunnable implements Runnable {
                             break;
                         case FORCE_UPDATE:
                             manager.stop(true);
-                            manager.handleUpdate();
+                            manager.handleUpdate(operation.getBuildNumber());
                             break;
                         case WRAPPER_STOP:
                             System.exit(0);
@@ -109,5 +106,13 @@ public class OperationRunnable implements Runnable {
 
             } catch (InterruptedException ignored) {}
         }
+    }
+
+    public static OperationRunnable getInstance() {
+        return instance;
+    }
+
+    public ProcessManager getManager() {
+        return manager;
     }
 }
