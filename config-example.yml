@@ -13,6 +13,7 @@ bot:
 wrapper:
   # Auth token to use for website/bot authentication
   token: ''
+  port: 8080
 
 redis:
   # IP of the redis server

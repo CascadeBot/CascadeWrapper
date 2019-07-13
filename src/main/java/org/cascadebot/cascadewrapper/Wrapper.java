@@ -95,10 +95,12 @@ public class Wrapper {
 
         url = config.getString("cascade.jenkins");
         cascadeWorkingDir = config.getString("cascade.dir", "../cascade");
+        
+        int port = config.getInt("wrapper.port", 8080);
 
         new Thread(new OperationRunnable()).start();
 
-        server = new WrapperSocketServer(new InetSocketAddress("localhost", 8080));
+        server = new WrapperSocketServer(new InetSocketAddress("localhost", port));
         server.start();
 
         try {
